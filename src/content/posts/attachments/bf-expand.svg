@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 248" width="600" height="248" role="img" aria-label="Expanding a gap of size 4 one command at a time">
+  <defs>
+    <marker id="expArr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 1 1.5 L 9 5 L 1 8.5 z" class="exp-arr"/>
+    </marker>
+    <style>
+      .exp-node     { fill: var(--muted, #f2f1ee); stroke: var(--border, #e2e0dc); stroke-width: 1.25; }
+      .exp-halt     { fill: var(--muted, #f2f1ee); stroke: var(--tip, #3d7d3a); stroke-width: 1.45; }
+      .exp-code     { font: 600 13px var(--font-mono, ui-monospace, 'SF Mono', Menlo, Consolas, monospace); fill: var(--foreground, #1c1b1a); text-anchor: middle; dominant-baseline: central; }
+      .exp-edge     { fill: none; stroke: var(--muted-foreground, #5f5d59); stroke-width: 1.35; opacity: 0.72; }
+      .exp-arr      { fill: var(--muted-foreground, #5f5d59); opacity: 0.72; }
+      .exp-sub      { font: 500 11.5px var(--font-mono, ui-monospace, 'SF Mono', Menlo, Consolas, monospace); fill: var(--muted-foreground, #5f5d59); text-anchor: middle; }
+      .exp-sub-halt { font: 600 11.5px var(--font-mono, ui-monospace, 'SF Mono', Menlo, Consolas, monospace); fill: var(--tip, #3d7d3a); text-anchor: middle; }
+    </style>
+  </defs>
+
+  <!-- Root 4? (cx 300) -> level 1 -->
+  <path d="M 300 42 C 300 64, 100 62, 100 84" class="exp-edge" marker-end="url(#expArr)"/>
+  <path d="M 300 42 C 300 64, 176 62, 176 84" class="exp-edge" marker-end="url(#expArr)"/>
+  <path d="M 300 42 C 300 64, 252 62, 252 84" class="exp-edge" marker-end="url(#expArr)"/>
+  <path d="M 300 42 C 300 64, 328 62, 328 84" class="exp-edge" marker-end="url(#expArr)"/>
+  <path d="M 300 42 C 300 64, 414 62, 414 84" class="exp-edge" marker-end="url(#expArr)"/>
+  <path d="M 300 42 C 300 64, 500 62, 500 84" class="exp-edge" marker-end="url(#expArr)"/>
+
+  <!-- *3? (cx 252) -> level 2 -->
+  <path d="M 252 118 C 252 156, 100 150, 100 184" class="exp-edge" marker-end="url(#expArr)"/>
+  <path d="M 252 118 C 252 156, 176 150, 176 184" class="exp-edge" marker-end="url(#expArr)"/>
+  <path d="M 252 118 C 252 156, 252 150, 252 184" class="exp-edge" marker-end="url(#expArr)"/>
+  <path d="M 252 118 C 252 156, 328 150, 328 184" class="exp-edge" marker-end="url(#expArr)"/>
+  <path d="M 252 118 C 252 156, 404 150, 404 184" class="exp-edge" marker-end="url(#expArr)"/>
+
+  <!-- Root -->
+  <g>
+    <rect x="272" y="10" width="56" height="32" rx="6" class="exp-node"/>
+    <text x="300" y="26" class="exp-code">4?</text>
+  </g>
+
+  <!-- Level 1 -->
+  <g>
+    <rect x="72" y="86" width="56" height="32" rx="6" class="exp-node"/>
+    <text x="100" y="102" class="exp-code">&lt;3?</text>
+    <text x="100" y="134" class="exp-sub">…</text>
+  </g>
+  <g>
+    <rect x="148" y="86" width="56" height="32" rx="6" class="exp-node"/>
+    <text x="176" y="102" class="exp-code">&gt;3?</text>
+    <text x="176" y="134" class="exp-sub">…</text>
+  </g>
+  <g>
+    <rect x="224" y="86" width="56" height="32" rx="6" class="exp-node"/>
+    <text x="252" y="102" class="exp-code">*3?</text>
+  </g>
+  <g>
+    <rect x="300" y="86" width="56" height="32" rx="6" class="exp-node"/>
+    <text x="328" y="102" class="exp-code">[]2?</text>
+    <text x="328" y="134" class="exp-sub">…</text>
+  </g>
+  <g>
+    <rect x="376" y="86" width="76" height="32" rx="6" class="exp-node"/>
+    <text x="414" y="102" class="exp-code">[1?]1?</text>
+    <text x="414" y="134" class="exp-sub">…</text>
+  </g>
+  <g>
+    <rect x="472" y="86" width="56" height="32" rx="6" class="exp-halt"/>
+    <text x="500" y="102" class="exp-code">[2?]</text>
+    <text x="500" y="134" class="exp-sub-halt">halts in 1</text>
+  </g>
+
+  <!-- Level 2 under *3? -->
+  <g>
+    <rect x="68" y="186" width="64" height="32" rx="6" class="exp-node"/>
+    <text x="100" y="202" class="exp-code">*&lt;2?</text>
+    <text x="100" y="234" class="exp-sub">…</text>
+  </g>
+  <g>
+    <rect x="144" y="186" width="64" height="32" rx="6" class="exp-node"/>
+    <text x="176" y="202" class="exp-code">*&gt;2?</text>
+    <text x="176" y="234" class="exp-sub">…</text>
+  </g>
+  <g>
+    <rect x="220" y="186" width="64" height="32" rx="6" class="exp-node"/>
+    <text x="252" y="202" class="exp-code">**2?</text>
+    <text x="252" y="234" class="exp-sub">…</text>
+  </g>
+  <g>
+    <rect x="296" y="186" width="64" height="32" rx="6" class="exp-node"/>
+    <text x="328" y="202" class="exp-code">*[]1?</text>
+    <text x="328" y="234" class="exp-sub">…</text>
+  </g>
+  <g>
+    <rect x="372" y="186" width="64" height="32" rx="6" class="exp-node"/>
+    <text x="404" y="202" class="exp-code">*[1?]</text>
+    <text x="404" y="234" class="exp-sub">…</text>
+  </g>
+</svg>

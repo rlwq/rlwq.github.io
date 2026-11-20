@@ -1,0 +1,26 @@
+---
+import Base from '../../layouts/Base.astro';
+import Column from '../../components/Column.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import PostList from '../../components/PostList.astro';
+import TagNav from '../../components/TagNav.astro';
+import { allTags, getPosts, hasTag, plural, type Post, type TagInfo } from '../../lib/posts';
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  return allTags(posts).map((tag) => ({
+    params: { tag: tag.slug },
+    props: { tag, all: posts, posts: posts.filter((p) => hasTag(p, tag.slug)) },
+  }));
+}
+
+const { tag, all, posts } = Astro.props as { tag: TagInfo; all: Post[]; posts: Post[] };
+---
+
+<Base title={`#${tag.name}`} description={`Articles tagged #${tag.name}`}>
+  <Column>
+    <PageHeader title={`#${tag.name}`}>{plural(posts.length, 'article')}</PageHeader>
+    <TagNav posts={all} current={tag.slug} />
+    <PostList posts={posts} />
+  </Column>
+</Base>

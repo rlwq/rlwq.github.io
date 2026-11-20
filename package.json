@@ -1,0 +1,29 @@
+{
+  "name": "blog",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/markdown-satteri": "^0.4.6",
+    "@astrojs/rss": "^4.0.19",
+    "@astrojs/sitemap": "^3.7.4",
+    "@fontsource-variable/source-serif-4": "^5.3.1",
+    "@fontsource/ibm-plex-mono": "^5.2.7",
+    "@fontsource/vt323": "^5.3.0",
+    "@tailwindcss/vite": "^4.3.4",
+    "astro": "^7.4.5",
+    "github-slugger": "^2.0.0",
+    "katex": "^0.16.25",
+    "tailwindcss": "^4.3.4"
+  },
+  "devDependencies": {
+    "@fontsource/source-serif-4": "^5.3.1",
+    "satori": "^0.63.2"
+  }
+}

@@ -1,0 +1,51 @@
+---
+import Base from '../layouts/Base.astro';
+import ArticleCards from '../components/ArticleCards.astro';
+import { getPosts, plural } from '../lib/posts';
+
+const posts = await getPosts();
+---
+
+<Base>
+  <div class="mx-auto max-w-[1100px] px-8 pt-10 pb-24 max-sm:px-4 max-sm:pt-8">
+    <div class="flex flex-col gap-12 lg:flex-row lg:items-start lg:gap-0">
+      <aside class="lg:sticky lg:top-[88px] lg:w-[330px] lg:shrink-0 lg:pr-10" data-home-about aria-label="About">
+        <p class="mb-3.5 font-mono text-[11.5px] tracking-[0.06em] text-muted-foreground uppercase">About</p>
+        <div class="space-y-3.5 text-[16.5px] leading-[26px] text-foreground/95">
+          <p>
+            I'm Carnavschi Serghei, a Software Engineering student at the Technical University of Moldova in Chișinău.
+          </p>
+          <p class="text-[15.5px] leading-[24px] text-muted-foreground">
+            Into mathematics, theoretical computer science, system design, and ML / applied AI.
+          </p>
+        </div>
+
+        <ul class="mt-6 flex flex-col gap-2 font-mono text-[12.5px]" data-about-links>
+          <li>
+            <a class="home-link text-primary no-underline" href="https://github.com/rlwq" target="_blank" rel="noreferrer">
+              github.com/rlwq
+            </a>
+          </li>
+          <li>
+            <a class="home-link text-primary no-underline" href="mailto:carnavschii2007@gmail.com">
+              carnavschii2007@gmail.com
+            </a>
+          </li>
+        </ul>
+      </aside>
+
+      <section class="min-w-0 flex-1 lg:pl-10" data-home-articles aria-labelledby="home-articles-label">
+        <div class="mb-5 flex items-baseline justify-between gap-4">
+          <h1 id="home-articles-label" class="font-mono text-[11.5px] tracking-[0.06em] text-muted-foreground uppercase">
+            Articles
+          </h1>
+          <span class="font-mono text-[11.5px] tracking-[0.06em] text-muted-foreground uppercase">
+            {plural(posts.length, 'article')}
+          </span>
+        </div>
+
+        <ArticleCards posts={posts} />
+      </section>
+    </div>
+  </div>
+</Base>

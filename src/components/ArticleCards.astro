@@ -1,0 +1,181 @@
+---
+import { Image } from 'astro:assets';
+import { render } from 'astro:content';
+import { postUrl, readingMinutes, tagUrl, type Post } from '../lib/posts';
+
+interface Props {
+  posts: Post[];
+}
+
+const { posts } = Astro.props;
+const isoDay = (d: Date) => d.toISOString().slice(0, 10);
+
+const coverPosClass = {
+  top: 'object-[50%_22%]',
+  center: 'object-center',
+  bottom: 'object-bottom',
+} as const;
+
+const items = await Promise.all(
+  posts.map(async (post) => {
+    const { headings } = await render(post);
+    const sections = headings.filter((h) => h.depth === 2 || h.depth === 3);
+    const minutes = readingMinutes(post.body ?? '');
+    const coverImg = post.data.cover;
+    return { post, sections, minutes, coverImg };
+  }),
+);
+
+const branch = (list: { depth: number }[], i: number) =>
+  list[i].depth === 3 ? (list[i + 1]?.depth === 3 ? 'mid' : 'last') : undefined;
+const parent = (list: { depth: number }[], i: number) =>
+  list[i].depth === 2 && list[i + 1]?.depth === 3 ? '' : undefined;
+const first = (list: { depth: number }[], i: number) =>
+  list[i].depth === 3 && list[i - 1]?.depth === 2 ? '' : undefined;
+---
+
+<ul class="grid gap-5" data-post-cards>
+  {
+    items.map(({ post, sections, minutes, coverImg }) => {
+      const hasCover = !!coverImg;
+      const hasToc = sections.length > 0;
+      const href = postUrl(post.id);
+
+      return (
+        <li class="flex flex-col md:flex-row md:items-stretch">
+          <article
+            class:list={[
+              'group relative isolate flex min-h-[152px] flex-1 flex-col overflow-hidden rounded-t-md border transition-colors md:h-[164px] md:rounded-l-md md:rounded-tr-none',
+              !hasToc && 'rounded-md md:rounded-md',
+              hasCover
+                ? 'border-border bg-[#161616] text-[#fafaf9]'
+                : 'border-border bg-card text-foreground hover:border-primary/40',
+            ]}
+          >
+            <a href={href} class="absolute inset-0 z-10" aria-label={post.data.title} />
+
+            {hasCover && (
+              <Image
+                src={coverImg}
+                alt=""
+                widths={[640]}
+                sizes="640px"
+                aria-hidden="true"
+                class:list={[
+                  'card-cover pointer-events-none absolute inset-0 h-full w-full object-cover',
+                  coverPosClass[post.data.coverPosition],
+                ]}
+              />
+            )}
+
+            <div
+              class:list={[
+                'pointer-events-none relative z-20 flex flex-1 flex-col px-5 py-4',
+                hasCover ? 'justify-end pt-14 md:pt-4' : 'justify-between gap-3',
+              ]}
+            >
+              {!hasCover && <span class="block h-[2.5px] w-9 bg-primary" aria-hidden="true" />}
+
+              <div>
+                <h2
+                  class:list={[
+                    'text-[21px] leading-[1.2] font-medium tracking-[-0.015em] text-balance transition-colors sm:text-[23px]',
+                    hasCover ? 'text-[#fafaf9] group-hover:text-[#f0a04b]' : 'text-foreground group-hover:text-primary',
+                  ]}
+                >
+                  {post.data.title}
+                </h2>
+
+                <p
+                  class:list={[
+                    'mt-2 font-mono text-[11px] leading-5 tracking-[0.06em] uppercase',
+                    hasCover ? 'text-[#d6d3ce]/85' : 'text-muted-foreground',
+                  ]}
+                >
+                  <time datetime={post.data.date.toISOString()}>{isoDay(post.data.date)}</time>
+                  <span class="mx-2 opacity-50" aria-hidden="true">·</span>
+                  <span>{minutes} min read</span>
+                </p>
+
+                {post.data.tags.length > 0 && (
+                  <div class="mt-2.5 flex flex-wrap gap-x-3.5 gap-y-1">
+                    {post.data.tags.map((t) => (
+                      <a
+                        href={tagUrl(t)}
+                        class:list={[
+                          'card-tag pointer-events-auto inline-flex items-center gap-1.5 font-mono text-[11px] leading-4 tracking-[0.06em] uppercase transition-colors',
+                          hasCover ? 'text-[#f0a04b]' : 'text-primary',
+                        ]}
+                      >
+                        {t}
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </article>
+
+          {hasToc && (
+            <nav
+              aria-label={`Sections in ${post.data.title}`}
+              class="card-toc-monitor relative isolate -mt-px flex max-h-[160px] shrink-0 flex-col overflow-hidden rounded-b-md border border-border md:mt-0 md:-ml-px md:h-[164px] md:max-h-none md:w-[195px] md:rounded-r-md md:rounded-bl-none xl:w-[205px]"
+            >
+              <ol class="h-full overflow-y-auto px-3.5 py-2.5 font-mono text-[11.5px] leading-[17px]">
+                {sections.map((sec, i) => (
+                  <li class="mb-1 last:mb-0" data-depth={sec.depth}>
+                    <a
+                      href={`${href}#${sec.slug}`}
+                      data-branch={branch(sections, i)}
+                      data-parent={parent(sections, i)}
+                      data-first={first(sections, i)}
+                      class="-ml-2.5 block pl-2.5 text-[#e7e5e2]/85 transition-colors hover:text-white"
+                    >
+                      {sec.text}
+                    </a>
+                  </li>
+                ))}
+              </ol>
+            </nav>
+          )}
+        </li>
+      );
+    })
+  }
+</ul>
+
+<noscript>
+  <style>
+    .card-cover { opacity: 0.4; }
+  </style>
+</noscript>
+
+<script>
+  import '../scripts/covers';
+</script>
+
+<style is:global>
+  /* CRT covers, painted by scripts/covers.ts. The <img> is only their source: it stays
+     invisible, unless scripts are off (<noscript> above) or painting failed. */
+  .card-cover {
+    opacity: 0;
+  }
+  .crt-failed .card-cover {
+    opacity: 0.4;
+  }
+  .card-crt {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    opacity: 0;
+    mix-blend-mode: screen;
+    transition: opacity 450ms ease;
+    /* dim the lower-left area where the title and tags sit */
+    -webkit-mask-image: radial-gradient(85% 95% at 0% 100%, rgba(0, 0, 0, 0.28) 0%, rgba(0, 0, 0, 0.34) 48%, #000 100%);
+    mask-image: radial-gradient(85% 95% at 0% 100%, rgba(0, 0, 0, 0.28) 0%, rgba(0, 0, 0, 0.34) 48%, #000 100%);
+  }
+  .has-crt .card-crt {
+    opacity: 1;
+  }
+</style>

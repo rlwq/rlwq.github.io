@@ -1,0 +1,33 @@
+---
+import { formatShort, postUrl, readingMinutes, type Post } from '../lib/posts';
+
+interface Props {
+  posts: Post[];
+}
+
+const { posts } = Astro.props;
+---
+
+<ul class="border-b">
+  {
+    posts.map((post) => (
+      <li>
+        <a class="group -mx-3 block border-t px-3 pt-4 pb-[18px] transition-colors hover:bg-muted" href={postUrl(post.id)}>
+          <span class="flex items-baseline justify-between gap-4">
+            <span class="text-[21px] leading-7 font-medium group-hover:text-primary">{post.data.title}</span>
+            <time class="shrink-0 font-sans text-xs text-muted-foreground" datetime={post.data.date.toISOString()}>
+              {formatShort(post.data.date)}
+            </time>
+          </span>
+          {post.data.description && <span class="mt-1 block text-base leading-[25px] text-muted-foreground">{post.data.description}</span>}
+          <span class="mt-2 flex flex-wrap items-center gap-1.5 font-sans text-xs leading-[18px] text-muted-foreground">
+            {post.data.tags.map((t) => (
+              <span class="rounded-full bg-primary/10 px-2.5 py-0.5 font-sans text-xs leading-4 text-primary">{t}</span>
+            ))}
+            <span class="ml-1">{readingMinutes(post.body ?? '')} min read</span>
+          </span>
+        </a>
+      </li>
+    ))
+  }
+</ul>

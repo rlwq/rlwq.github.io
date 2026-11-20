@@ -1,0 +1,543 @@
+@import 'tailwindcss';
+
+/* dark: utilities follow the site theme switch, not only the OS setting. */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+/* ---------------------------------------------------------------------------
+   Palette "graphite and amber". Utilities: bg-background, text-foreground,
+   text-primary, bg-muted, text-muted-foreground, border-border, ...
+--------------------------------------------------------------------------- */
+:root {
+  --radius: 0.375rem;
+  --background: #fafaf9;
+  --foreground: #1c1b1a;
+  --card: #fafaf9;
+  --card-foreground: #1c1b1a;
+  --popover: #ffffff;
+  --popover-foreground: #1c1b1a;
+  --primary: #b45309;
+  --primary-foreground: #fafaf9;
+  --secondary: #f2f1ee;
+  --secondary-foreground: #1c1b1a;
+  --muted: #f2f1ee;
+  --muted-foreground: #5f5d59;
+  --accent: #f2f1ee;
+  --accent-foreground: #1c1b1a;
+  --destructive: #b3261e;
+  --border: #e2e0dc;
+  --input: #e2e0dc;
+  --ring: #b45309;
+  /* callouts and code */
+  --note: #2f6db5;
+  --tip: #3d7d3a;
+  --warning: #8f7400;
+  --danger: #b3261e;
+  color-scheme: light;
+}
+
+[data-theme='dark'] {
+  --background: #121212;
+  --foreground: #e7e5e2;
+  --card: #171716;
+  --card-foreground: #e7e5e2;
+  --popover: #1a1a19;
+  --popover-foreground: #e7e5e2;
+  --primary: #f0a04b;
+  --primary-foreground: #121212;
+  --secondary: #1a1a19;
+  --secondary-foreground: #e7e5e2;
+  --muted: #1a1a19;
+  --muted-foreground: #a19e98;
+  --accent: #212120;
+  --accent-foreground: #e7e5e2;
+  --destructive: #ef7d72;
+  --border: #292826;
+  --input: #292826;
+  --ring: #f0a04b;
+  --note: #7aa7e8;
+  --tip: #8fc07a;
+  --warning: #e3c454;
+  --danger: #ef7d72;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-note: var(--note);
+  --color-tip: var(--tip);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+  --radius-xl: calc(var(--radius) + 6px);
+}
+
+@theme {
+  --font-serif: 'Source Serif 4 Variable', Georgia, 'Times New Roman', serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+  /* Reading column: 620px of text + 32px padding on each side. */
+  --container-column: 42.75rem;
+  /* Wide enough for the table of contents and sidenotes in the margins. */
+  --breakpoint-wide: 78.75rem;
+}
+
+@layer base {
+  *,
+  ::after,
+  ::before {
+    border-color: var(--color-border);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    overscroll-behavior: none;
+  }
+
+  body {
+    @apply bg-background font-serif text-foreground antialiased;
+    font-size: 18px;
+    line-height: 30px;
+    font-optical-sizing: auto;
+    text-rendering: optimizeLegibility;
+    overscroll-behavior: none;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--primary) 28%, transparent);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  kbd {
+    @apply inline-block rounded-[3px] border px-[5px] align-[2px] font-sans text-[11px] leading-[17px] text-muted-foreground;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Smooth cross-document transitions (supported in Chrome, Safari 18.2+, Edge).
+--------------------------------------------------------------------------- */
+@view-transition {
+  navigation: auto;
+}
+
+[data-site-header] {
+  view-transition-name: site-header;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 180ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Bidirectional sidenote <-> reference highlight (pure CSS, zero JS).
+--------------------------------------------------------------------------- */
+.sidenote-ref {
+  cursor: default;
+  padding: 1px 3px;
+  margin-inline: -1px;
+  border-radius: 3px;
+  transition: background-color 150ms ease;
+}
+
+.sidenote {
+  transition: color 150ms ease;
+}
+
+.sidenote-n {
+  display: inline-block;
+  line-height: 1;
+  padding: 2px 4px;
+  margin-inline-start: -4px;
+  vertical-align: 1px;
+  border-radius: 3px;
+  transition: background-color 150ms ease;
+}
+
+.sidenote-ref:hover,
+.sidenote-ref:has(+ .sidenote:hover),
+.sidenote-ref:hover + .sidenote .sidenote-n,
+.sidenote:hover .sidenote-n {
+  background: color-mix(in srgb, var(--primary) 20%, transparent);
+}
+
+.sidenote-ref:hover + .sidenote,
+.sidenote:hover {
+  color: var(--foreground);
+}
+
+/* ---------------------------------------------------------------------------
+   Cropped preview for tall artwork (`![...](img "plate")`); lightbox shows full.
+--------------------------------------------------------------------------- */
+.figure-plate img {
+  aspect-ratio: 1600 / 690;
+  object-fit: cover;
+  object-position: top;
+}
+
+/* ---------------------------------------------------------------------------
+   Figure captions: right-aligned, in the serif's italic. (Set here rather than in
+   markdown-classes.mjs: rendered articles are cached, so class changes there
+   don't reach existing articles until the content cache is cleared.)
+--------------------------------------------------------------------------- */
+main figure figcaption {
+  text-align: right;
+  /* a real italic: the serif's own italic cut, not the slanted system sans */
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 14.5px;
+  line-height: 21px;
+}
+/* code inside a caption stays upright, like code everywhere else */
+main figure figcaption code {
+  font-style: normal;
+  font-size: 0.86em;
+  /* no chip: upright mono already sets code apart from the italic */
+  border: 0;
+  background: none;
+  padding: 0;
+}
+
+/* ---------------------------------------------------------------------------
+   Click-to-zoom figure lightbox (images and inline SVGs).
+--------------------------------------------------------------------------- */
+article figure img {
+  background-color: transparent;
+}
+
+main figure img,
+main figure .svg-figure,
+main figure .svg-figure svg,
+main figure .svg-figure svg * {
+  cursor: pointer;
+}
+
+body:has(dialog.lightbox[open]) {
+  overflow: hidden;
+}
+
+dialog.lightbox {
+  max-width: none;
+  max-height: none;
+  width: 100vw;
+  height: 100dvh;
+  margin: 0;
+  padding: 56px 24px 24px;
+  border: 0;
+  background: transparent;
+  color: var(--foreground);
+  cursor: pointer;
+  display: none;
+  place-items: center;
+  opacity: 0;
+  transition:
+    opacity 160ms ease,
+    display 160ms allow-discrete,
+    overlay 160ms allow-discrete;
+}
+
+dialog.lightbox[open] {
+  display: grid;
+  opacity: 1;
+}
+
+@starting-style {
+  dialog.lightbox[open] {
+    opacity: 0;
+  }
+}
+
+dialog.lightbox::backdrop {
+  background: color-mix(in srgb, var(--background) 92%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  opacity: 0;
+  transition:
+    opacity 160ms ease,
+    display 160ms allow-discrete,
+    overlay 160ms allow-discrete;
+}
+
+dialog.lightbox[open]::backdrop {
+  opacity: 1;
+}
+
+@starting-style {
+  dialog.lightbox[open]::backdrop {
+    opacity: 0;
+  }
+}
+
+.lightbox-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 48px;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  pointer-events: none;
+}
+
+.lightbox-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 2px;
+  border: 0;
+  background: none;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  pointer-events: auto;
+  transition:
+    color 180ms ease,
+    text-shadow var(--lamp-out, 350ms) var(--lamp-out-ease, ease);
+}
+
+.lightbox-btn:hover {
+  color: var(--foreground);
+  transition:
+    color 120ms ease,
+    text-shadow var(--lamp-in, 120ms) ease-out;
+  text-shadow:
+    0 0 10px rgb(var(--lamp-aura, 240 160 75) / calc(0.28 * var(--lamp-aura-a, 1))),
+    0 0 22px rgb(var(--lamp-aura, 240 160 75) / calc(0.12 * var(--lamp-aura-a, 1)));
+}
+
+.lightbox-close kbd {
+  border: 0;
+  padding: 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: color-mix(in srgb, var(--muted-foreground) 75%, transparent);
+}
+
+.lightbox-close kbd::before {
+  content: '[';
+  opacity: 0.55;
+}
+
+.lightbox-close kbd::after {
+  content: ']';
+  opacity: 0.55;
+}
+
+.lightbox-inner {
+  display: table;
+  max-width: 92vw;
+  max-height: calc(100dvh - 80px);
+  transform: scale(0.97);
+  transition: transform 160ms ease;
+}
+
+dialog.lightbox[open] .lightbox-inner {
+  transform: scale(1);
+}
+
+@starting-style {
+  dialog.lightbox[open] .lightbox-inner {
+    transform: scale(0.97);
+  }
+}
+
+/* Kinescope frame for fullscreen figures, matching code blocks */
+.lightbox-frame {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.16);
+}
+
+[data-theme='dark'] .lightbox-frame {
+  box-shadow: 0 22px 64px rgba(0, 0, 0, 0.6);
+}
+
+/* quiet pixel + scanline grid on SVG diagrams only (keeps raster paintings clean) */
+.lightbox-frame:has(.lightbox-svg)::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+  background-image:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0 2px,
+      rgb(0 0 0 / 0.018) 2px 3px
+    ),
+    repeating-linear-gradient(
+      to right,
+      rgb(255 250 250) 0 1px,
+      rgb(250 255 250) 1px 2px,
+      rgb(250 250 255) 2px 3px
+    );
+}
+
+[data-theme='dark'] .lightbox-frame:has(.lightbox-svg)::before {
+  background-image:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0 2px,
+      rgb(0 0 0 / 0.12) 2px 3px
+    ),
+    repeating-linear-gradient(
+      to right,
+      rgb(255 232 232) 0 1px,
+      rgb(232 255 232) 1px 2px,
+      rgb(232 232 255) 2px 3px
+    );
+}
+
+/* soft glass sheen + tube vignette + recessed inner rim */
+.lightbox-frame::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background:
+    linear-gradient(155deg, rgb(255 255 255 / 0.22) 0%, rgb(255 255 255 / 0.05) 28%, transparent 46%),
+    radial-gradient(ellipse 84% 110% at 50% 45%, transparent 58%, rgb(0 0 0 / 0.05) 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.45),
+    inset 0 0 0 1px rgb(0 0 0 / 0.05),
+    inset 0 1px 10px rgb(0 0 0 / 0.04);
+}
+
+[data-theme='dark'] .lightbox-frame::after {
+  background:
+    linear-gradient(155deg, rgb(255 255 255 / 0.07) 0%, rgb(255 255 255 / 0.015) 28%, transparent 46%),
+    radial-gradient(ellipse 84% 110% at 50% 45%, transparent 54%, rgb(0 0 0 / 0.24) 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.09),
+    inset 0 0 0 1px rgb(0 0 0 / 0.26),
+    inset 0 2px 16px rgb(0 0 0 / 0.22);
+}
+
+.lightbox-img {
+  display: block;
+  max-width: min(92vw, 1280px);
+  max-height: 78dvh;
+  width: auto;
+  height: auto;
+  background: transparent;
+}
+
+.lightbox-svg {
+  display: block;
+  box-sizing: content-box;
+  max-width: calc(90vw - 48px);
+  max-height: calc(76dvh - 48px);
+  padding: 24px;
+  background-color: #f3f2ef;
+}
+
+[data-theme='dark'] .lightbox-svg {
+  background-color: #1b1b1a;
+}
+
+.lightbox-caption {
+  display: table-caption;
+  caption-side: bottom;
+  margin-top: 12px;
+  text-align: right;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 15px;
+  line-height: 22px;
+  color: var(--muted-foreground);
+  cursor: text;
+}
+
+.lightbox-caption code {
+  font-style: normal;
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  border: 0;
+  background: none;
+  padding: 0;
+}
+
+/* ---------------------------------------------------------------------------
+   Smooth open & close transitions for the search dialog.
+--------------------------------------------------------------------------- */
+dialog[data-search] {
+  opacity: 0;
+  transform: translateY(-6px) scale(0.985);
+  transition:
+    opacity 150ms ease,
+    transform 150ms ease,
+    display 150ms allow-discrete,
+    overlay 150ms allow-discrete;
+}
+
+dialog[data-search][open] {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+@starting-style {
+  dialog[data-search][open] {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.985);
+  }
+}
+
+dialog[data-search]::backdrop {
+  opacity: 0;
+  transition:
+    opacity 150ms ease,
+    display 150ms allow-discrete,
+    overlay 150ms allow-discrete;
+}
+
+dialog[data-search][open]::backdrop {
+  opacity: 1;
+}
+
+@starting-style {
+  dialog[data-search][open]::backdrop {
+    opacity: 0;
+  }
+}

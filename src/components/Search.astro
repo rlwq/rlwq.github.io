@@ -1,0 +1,27 @@
+<dialog
+  class="mx-auto mt-[12vh] max-h-[min(560px,76vh)] w-[min(620px,calc(100vw-32px))] overflow-hidden rounded-md border bg-background p-0 text-foreground shadow-2xl backdrop:bg-black/45 backdrop:backdrop-blur-[2px] open:flex open:flex-col"
+  data-search
+  aria-label="Search articles"
+>
+  <div class="flex items-center gap-3 border-b px-[18px]">
+    <svg class="size-[18px] shrink-0 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <circle cx="11" cy="11" r="7"></circle>
+      <path d="m20 20-3.5-3.5"></path>
+    </svg>
+    <input
+      class="h-14 min-w-0 flex-1 bg-transparent text-xl outline-none placeholder:text-muted-foreground/70"
+      type="search"
+      placeholder="Search articles…"
+      autocomplete="off"
+      spellcheck="false"
+      aria-label="Search query"
+      aria-controls="search-results"
+      data-search-input
+    />
+    <kbd>Esc</kbd>
+  </div>
+  <ul class="overflow-y-auto p-1.5" id="search-results" role="listbox" data-search-results></ul>
+  <p class="p-[18px] font-sans text-[13px] text-muted-foreground" data-search-empty>
+    Start typing — search covers titles, tags and article text.
+  </p>
+</dialog>

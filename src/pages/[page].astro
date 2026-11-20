@@ -1,0 +1,22 @@
+---
+// Standalone pages from src/content/pages: about.md -> /about/
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import Column from '../components/Column.astro';
+import PageHeader from '../components/PageHeader.astro';
+
+export async function getStaticPaths() {
+  const pages = await getCollection('pages');
+  return pages.map((page) => ({ params: { page: page.id }, props: { page } }));
+}
+
+const { page } = Astro.props as { page: CollectionEntry<'pages'> };
+const { Content } = await render(page);
+---
+
+<Base title={page.data.title} description={page.data.description}>
+  <Column as="article">
+    <PageHeader title={page.data.title} />
+    <Content />
+  </Column>
+</Base>

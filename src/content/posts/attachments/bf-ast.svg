@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 334 310" width="334" height="310" role="img" aria-label="Uniform diagonal AST tree of the program *[<*]>">
+  <defs>
+    <marker id="arrRest" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M 1 1.5 L 9 5 L 1 8.5 z" class="ast-arr"/>
+    </marker>
+    <style>
+      .ast-node   { fill: var(--muted, #f2f1ee); stroke: var(--border, #e2e0dc); stroke-width: 1.25; }
+      .ast-nil    { fill: none; stroke: var(--border, #e2e0dc); stroke-width: 1.25; stroke-dasharray: 4 3; }
+      .ast-ctor   { font: 600 13px var(--font-mono, ui-monospace, 'SF Mono', Menlo, Consolas, monospace); fill: var(--foreground, #1c1b1a); text-anchor: middle; dominant-baseline: central; }
+      .ast-nctor  { font: 500 15px var(--font-mono, ui-monospace, 'SF Mono', Menlo, Consolas, monospace); fill: var(--muted-foreground, #5f5d59); text-anchor: middle; dominant-baseline: central; }
+      .ast-sym    { font: 700 13.5px var(--font-mono, ui-monospace, 'SF Mono', Menlo, Consolas, monospace); fill: var(--muted-foreground, #5f5d59); text-anchor: middle; dominant-baseline: central; }
+      .ast-div    { stroke: var(--border, #e2e0dc); stroke-width: 1; }
+      .ast-edge   { fill: none; stroke: var(--muted-foreground, #5f5d59); stroke-width: 1.45; opacity: 0.72; }
+      .ast-arr    { fill: var(--muted-foreground, #5f5d59); opacity: 0.72; }
+      .ast-lbl    { font: 500 11.5px var(--font-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif); fill: var(--muted-foreground, #5f5d59); text-anchor: middle; }
+    </style>
+  </defs>
+
+  <!-- All 6 edges have identical length and angle: (dx = ±36, dy = +26) -->
+  <line x1="73"  y1="48"  x2="109" y2="74"  class="ast-edge" marker-end="url(#arrRest)"/>
+  <text x="107" y="57" class="ast-lbl">rest</text>
+
+  <line x1="109" y1="110" x2="73"  y2="136" class="ast-edge" marker-end="url(#arrRest)"/>
+  <text x="73"  y="119" class="ast-lbl">body</text>
+
+  <line x1="149" y1="110" x2="185" y2="136" class="ast-edge" marker-end="url(#arrRest)"/>
+  <text x="183" y="119" class="ast-lbl">rest</text>
+
+  <line x1="73"  y1="172" x2="109" y2="198" class="ast-edge" marker-end="url(#arrRest)"/>
+  <text x="107" y="181" class="ast-lbl">rest</text>
+
+  <line x1="225" y1="172" x2="261" y2="198" class="ast-edge" marker-end="url(#arrRest)"/>
+  <text x="259" y="181" class="ast-lbl">rest</text>
+
+  <line x1="149" y1="234" x2="185" y2="260" class="ast-edge" marker-end="url(#arrRest)"/>
+  <text x="183" y="243" class="ast-lbl">rest</text>
+
+  <!-- Row 0, Col 0 (cx=53): flip (*) -->
+  <g>
+    <rect x="14" y="14" width="78" height="34" rx="6" class="ast-node"/>
+    <text x="40" y="31" class="ast-ctor">flip</text>
+    <line x1="66" y1="21" x2="66" y2="41" class="ast-div"/>
+    <text x="79" y="31" class="ast-sym">*</text>
+  </g>
+
+  <!-- Row 1, Col 1 (cx=129): loop ([]) -->
+  <g>
+    <rect x="90" y="76" width="78" height="34" rx="6" class="ast-node"/>
+    <text x="116" y="93" class="ast-ctor">loop</text>
+    <line x1="142" y1="83" x2="142" y2="103" class="ast-div"/>
+    <text x="155" y="93" class="ast-sym">[]</text>
+  </g>
+
+  <!-- Row 2, Col 0 (cx=53): left (<) and Col 2 (cx=205): right (>) -->
+  <g>
+    <rect x="14" y="138" width="78" height="34" rx="6" class="ast-node"/>
+    <text x="40" y="155" class="ast-ctor">left</text>
+    <line x1="66" y1="145" x2="66" y2="165" class="ast-div"/>
+    <text x="79" y="155" class="ast-sym">&lt;</text>
+  </g>
+  <g>
+    <rect x="166" y="138" width="78" height="34" rx="6" class="ast-node"/>
+    <text x="192" y="155" class="ast-ctor">right</text>
+    <line x1="218" y1="145" x2="218" y2="165" class="ast-div"/>
+    <text x="231" y="155" class="ast-sym">&gt;</text>
+  </g>
+
+  <!-- Row 3, Col 1 (cx=129): flip (*) and Col 3 (cx=281): ε -->
+  <g>
+    <rect x="90" y="200" width="78" height="34" rx="6" class="ast-node"/>
+    <text x="116" y="217" class="ast-ctor">flip</text>
+    <line x1="142" y1="207" x2="142" y2="227" class="ast-div"/>
+    <text x="155" y="217" class="ast-sym">*</text>
+  </g>
+  <g>
+    <rect x="242" y="200" width="78" height="34" rx="6" class="ast-nil"/>
+    <text x="281" y="217" class="ast-nctor">ε</text>
+  </g>
+
+  <!-- Row 4, Col 2 (cx=205): ε -->
+  <g>
+    <rect x="166" y="262" width="78" height="34" rx="6" class="ast-nil"/>
+    <text x="205" y="279" class="ast-nctor">ε</text>
+  </g>
+</svg>

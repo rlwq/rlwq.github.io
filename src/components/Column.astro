@@ -1,0 +1,11 @@
+---
+// The centered reading column used by every page except the archive.
+interface Props {
+  as?: 'div' | 'article';
+}
+const { as: Tag = 'div' } = Astro.props;
+---
+
+<Tag class="relative mx-auto max-w-column px-8 pt-10 pb-24 max-sm:px-4 max-sm:pt-8">
+  <slot />
+</Tag>

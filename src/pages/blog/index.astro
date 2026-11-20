@@ -1,0 +1,15 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import ArticleCards from '../../components/ArticleCards.astro';
+import { getPosts, plural } from '../../lib/posts';
+
+const posts = await getPosts();
+---
+
+<Base title="Articles" description="All articles on the blog.">
+  <div class="mx-auto max-w-[1080px] px-8 pt-10 pb-24 max-sm:px-4 max-sm:pt-8">
+    <PageHeader title="Articles">{plural(posts.length, 'article')}</PageHeader>
+    <ArticleCards posts={posts} />
+  </div>
+</Base>

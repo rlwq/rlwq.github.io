@@ -1,0 +1,54 @@
+---
+import type { MarkdownHeading } from 'astro';
+
+interface Props {
+  headings: MarkdownHeading[];
+  /** side: sticky in the left margin of wide screens; inline: a fold-out box above the text. */
+  variant: 'side' | 'inline';
+}
+
+const { headings, variant } = Astro.props;
+const item = (depth: number) => (depth === 3 ? 'mb-2 pl-3 text-[12.5px]' : 'mb-2');
+const link =
+  '-ml-3 block border-l-2 border-transparent pl-2.5 text-muted-foreground transition-colors hover:text-foreground data-active:border-primary data-active:text-primary';
+// For styling hooks: depth of each entry, and whether a sub-entry is the last of its group
+// (so a tree view can draw ├─ or └─).
+const branch = (i: number) =>
+  headings[i].depth === 3 ? (headings[i + 1]?.depth === 3 ? 'mid' : 'last') : undefined;
+// a section whose sub-sections follow it: the tree hangs off its number
+const parent = (i: number) => (headings[i].depth === 2 && headings[i + 1]?.depth === 3 ? '' : undefined);
+// the first sub-entry under a section: its trunk starts at the section's rule
+const first = (i: number) => (headings[i].depth === 3 && headings[i - 1]?.depth === 2 ? '' : undefined);
+---
+
+{
+  variant === 'side' ? (
+    <aside class="absolute top-[46px] right-[calc(100%-8px)] bottom-24 hidden w-[210px] wide:block" aria-label="Contents">
+      <nav class="sticky top-[94px] max-h-[calc(100vh-128px)] overflow-y-auto pl-3 [scrollbar-width:thin]" data-toc>
+        <p class="mb-3 font-sans text-[13px] leading-5 font-medium text-muted-foreground">Contents</p>
+        <ol class="font-sans text-[13px] leading-[19px]">
+          {headings.map((h, i) => (
+            <li class={item(h.depth)} data-depth={h.depth}>
+              <a class={link} href={`#${h.slug}`} data-branch={branch(i)} data-parent={parent(i)} data-first={first(i)}>
+                {h.text}
+              </a>
+            </li>
+          ))}
+        </ol>
+      </nav>
+    </aside>
+  ) : (
+    <details class="group -mt-2 mb-9 rounded-md border py-2.5 pr-4 pl-7 wide:hidden">
+      <summary class="-ml-3 cursor-pointer font-sans text-[13px] font-medium text-muted-foreground group-open:mb-3">Contents</summary>
+      <ol class="font-sans text-[13px] leading-[19px]">
+        {headings.map((h, i) => (
+          <li class={item(h.depth)} data-depth={h.depth}>
+            <a class={link} href={`#${h.slug}`} data-branch={branch(i)} data-parent={parent(i)} data-first={first(i)}>
+              {h.text}
+            </a>
+          </li>
+        ))}
+      </ol>
+    </details>
+  )
+}

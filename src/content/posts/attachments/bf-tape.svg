@@ -1,0 +1,199 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 198" width="680" height="198" role="img" aria-label="Animated execution of *<*[>] on a bi-infinite binary tape">
+  <defs>
+    <linearGradient id="fadeGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#000000"/>
+      <stop offset="12%"  stop-color="#ffffff"/>
+      <stop offset="88%"  stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#000000"/>
+    </linearGradient>
+    <mask id="tapeMask">
+      <rect x="54" y="54" width="572" height="60" fill="url(#fadeGrad)"/>
+    </mask>
+    <style>
+      .bft-ribbon { fill: var(--muted, #f2f1ee); }
+      .bft-grid   { stroke: var(--border, #e2e0dc); stroke-width: 1.25; }
+      .bft-z      { font: 400 20px var(--font-mono, ui-monospace, 'SF Mono', Menlo, Consolas, monospace); fill: var(--muted-foreground, #5f5d59); opacity: 0.6; text-anchor: middle; dominant-baseline: central; }
+      .bft-o      { font: 700 20px var(--font-mono, ui-monospace, 'SF Mono', Menlo, Consolas, monospace); fill: var(--foreground, #1c1b1a); text-anchor: middle; dominant-baseline: central; }
+      .bft-accent { fill: var(--primary, #b45309); }
+      .bft-frame  { fill: none; stroke: var(--primary, #b45309); stroke-width: 2; }
+      .bft-lbl    { font: 600 13.5px var(--font-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif); fill: var(--primary, #b45309); text-anchor: middle; letter-spacing: 0.02em; }
+      .bft-dot    { font: 400 18px var(--font-mono, ui-monospace, 'SF Mono', Menlo, Consolas, monospace); fill: var(--muted-foreground, #5f5d59); opacity: 0.55; text-anchor: middle; dominant-baseline: central; }
+
+      .bft-tok-bg { fill: var(--muted, #f2f1ee); stroke: var(--border, #e2e0dc); stroke-width: 1.1; }
+      .bft-tok    { font: 600 17px var(--font-mono, ui-monospace, 'SF Mono', Menlo, Consolas, monospace); fill: var(--foreground, #1c1b1a); text-anchor: middle; dominant-baseline: central; }
+      .bft-meta   { font: 500 12.5px var(--font-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif); fill: var(--muted-foreground, #5f5d59); dominant-baseline: central; }
+      .bft-halt   { font: 600 12.5px var(--font-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif); fill: var(--tip, #3d7d3a); dominant-baseline: central; opacity: 0; animation: bft-halt 10s ease-in-out infinite; }
+      .bft-pc     { fill: color-mix(in srgb, var(--primary, #b45309) 16%, transparent); stroke: var(--primary, #b45309); stroke-width: 1.75; opacity: 0; animation: bft-pc 10s ease-in-out infinite; }
+
+      .bft-cursor { animation: bft-cursor 10s ease-in-out infinite; }
+      .bft-c0-z   { animation: bft-c0-z 10s linear infinite; }
+      .bft-c0-o   { opacity: 0; animation: bft-c0-o 10s linear infinite; }
+      .bft-cm1-z  { animation: bft-cm1-z 10s linear infinite; }
+      .bft-cm1-o  { opacity: 0; animation: bft-cm1-o 10s linear infinite; }
+
+      .bft-t0 { animation: bft-t0 10s linear infinite; }
+      .bft-t1 { animation: bft-t1 10s linear infinite; }
+      .bft-t2 { animation: bft-t2 10s linear infinite; }
+      .bft-t3 { animation: bft-t3 10s linear infinite; }
+      .bft-t4 { animation: bft-t4 10s linear infinite; }
+
+      /* Cursor slides: 0 -> -1 (step 2) -> 0 (step 5) -> +1 (step 7) -> reset */
+      @keyframes bft-cursor {
+        0%, 18%    { transform: translateX(0px); }
+        22.5%, 45% { transform: translateX(-52px); }
+        49.5%, 63% { transform: translateX(0px); }
+        67.5%, 94% { transform: translateX(52px); }
+        98%, 100%  { transform: translateX(0px); }
+      }
+
+      /* Cell 0 flips 0 -> 1 at step 1 (10%), resets at 95% */
+      @keyframes bft-c0-z {
+        0%, 9.5%   { opacity: 0.6; }
+        11%, 94.5% { opacity: 0; }
+        96.5%, 100%{ opacity: 0.6; }
+      }
+      @keyframes bft-c0-o {
+        0%, 9.5%   { opacity: 0; }
+        11%, 94.5% { opacity: 1; }
+        96.5%, 100%{ opacity: 0; }
+      }
+
+      /* Cell -1 flips 0 -> 1 at step 3 (28%), resets at 95% */
+      @keyframes bft-cm1-z {
+        0%, 27.5%  { opacity: 0.6; }
+        29%, 94.5% { opacity: 0; }
+        96.5%, 100%{ opacity: 0.6; }
+      }
+      @keyframes bft-cm1-o {
+        0%, 27.5%  { opacity: 0; }
+        29%, 94.5% { opacity: 1; }
+        96.5%, 100%{ opacity: 0; }
+      }
+
+      /* Program highlight box: idx 0, 1, 2, 3, 4, 3, 4, 3 then off */
+      @keyframes bft-pc {
+        0%, 6.5%   { opacity: 0; transform: translateX(0px); }
+        8%, 15.5%  { opacity: 1; transform: translateX(0px); }
+        17.5%, 24.5% { opacity: 1; transform: translateX(40px); }
+        26.5%, 33.5% { opacity: 1; transform: translateX(80px); }
+        35.5%, 42.5% { opacity: 1; transform: translateX(120px); }
+        44.5%, 51.5% { opacity: 1; transform: translateX(160px); }
+        53.5%, 60.5% { opacity: 1; transform: translateX(120px); }
+        62.5%, 69.5% { opacity: 1; transform: translateX(160px); }
+        71.5%, 78.5% { opacity: 1; transform: translateX(120px); }
+        80.5%, 100%  { opacity: 0; transform: translateX(120px); }
+      }
+
+      /* Active operator text tint */
+      @keyframes bft-t0 {
+        0%, 7%, 16.5%, 100% { fill: var(--foreground, #1c1b1a); }
+        8%, 15.5%           { fill: var(--primary, #b45309); }
+      }
+      @keyframes bft-t1 {
+        0%, 16.5%, 25.5%, 100% { fill: var(--foreground, #1c1b1a); }
+        17.5%, 24.5%           { fill: var(--primary, #b45309); }
+      }
+      @keyframes bft-t2 {
+        0%, 25.5%, 34.5%, 100% { fill: var(--foreground, #1c1b1a); }
+        26.5%, 33.5%           { fill: var(--primary, #b45309); }
+      }
+      @keyframes bft-t3 {
+        0%, 34.5%, 43.5%, 52.5%, 61.5%, 70.5%, 79.5%, 100% { fill: var(--foreground, #1c1b1a); }
+        35.5%, 42.5%, 53.5%, 60.5%, 71.5%, 78.5%           { fill: var(--primary, #b45309); }
+      }
+      @keyframes bft-t4 {
+        0%, 43.5%, 52.5%, 61.5%, 70.5%, 100% { fill: var(--foreground, #1c1b1a); }
+        44.5%, 51.5%, 62.5%, 69.5%           { fill: var(--primary, #b45309); }
+      }
+
+      /* Halt label after step 8 */
+      @keyframes bft-halt {
+        0%, 79%    { opacity: 0; }
+        81%, 93%   { opacity: 1; }
+        95%, 100%  { opacity: 0; }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .bft-cursor, .bft-c0-z, .bft-c0-o, .bft-cm1-z, .bft-cm1-o,
+        .bft-pc, .bft-t0, .bft-t1, .bft-t2, .bft-t3, .bft-t4, .bft-halt {
+          animation: none !important;
+        }
+        .bft-c0-z, .bft-cm1-z { opacity: 0; }
+        .bft-c0-o, .bft-cm1-o { opacity: 1; }
+        .bft-pc { opacity: 1; transform: translateX(120px); }
+      }
+    </style>
+  </defs>
+
+  <!-- Tape strip with true alpha fade on both ends -->
+  <g mask="url(#tapeMask)">
+    <rect x="54" y="58" width="572" height="52" class="bft-ribbon"/>
+    <g class="bft-grid">
+      <line x1="54"  y1="58"  x2="626" y2="58"/>
+      <line x1="54"  y1="110" x2="626" y2="110"/>
+      <line x1="106" y1="58"  x2="106" y2="110"/>
+      <line x1="158" y1="58"  x2="158" y2="110"/>
+      <line x1="210" y1="58"  x2="210" y2="110"/>
+      <line x1="262" y1="58"  x2="262" y2="110"/>
+      <line x1="314" y1="58"  x2="314" y2="110"/>
+      <line x1="366" y1="58"  x2="366" y2="110"/>
+      <line x1="418" y1="58"  x2="418" y2="110"/>
+      <line x1="470" y1="58"  x2="470" y2="110"/>
+      <line x1="522" y1="58"  x2="522" y2="110"/>
+      <line x1="574" y1="58"  x2="574" y2="110"/>
+    </g>
+
+    <!-- Static zero cells -->
+    <text x="80"  y="84" class="bft-z">0</text>
+    <text x="132" y="84" class="bft-z">0</text>
+    <text x="184" y="84" class="bft-z">0</text>
+    <text x="236" y="84" class="bft-z">0</text>
+    <!-- Cell -1 (flips at step 3) -->
+    <text x="288" y="84" class="bft-z bft-cm1-z">0</text>
+    <text x="288" y="84" class="bft-o bft-cm1-o">1</text>
+    <!-- Cell 0 (flips at step 1) -->
+    <text x="340" y="84" class="bft-z bft-c0-z">0</text>
+    <text x="340" y="84" class="bft-o bft-c0-o">1</text>
+    <!-- Static zero cells to the right -->
+    <text x="392" y="84" class="bft-z">0</text>
+    <text x="444" y="84" class="bft-z">0</text>
+    <text x="496" y="84" class="bft-z">0</text>
+    <text x="548" y="84" class="bft-z">0</text>
+    <text x="600" y="84" class="bft-z">0</text>
+  </g>
+
+  <text x="32"  y="84" class="bft-dot">…</text>
+  <text x="648" y="84" class="bft-dot">…</text>
+
+  <!-- Animated cursor: label + pointer + active cell border -->
+  <g class="bft-cursor">
+    <text x="340" y="23" class="bft-lbl">cursor</text>
+    <polygon points="328,32 352,32 340,49" class="bft-accent"/>
+    <rect x="314" y="58" width="52" height="52" class="bft-frame"/>
+  </g>
+
+  <!-- Program bar at the bottom: * < * [ > ] -->
+  <text x="207" y="158" class="bft-meta" text-anchor="end">program</text>
+
+  <g>
+    <rect x="223" y="140" width="34" height="36" rx="5" class="bft-tok-bg"/>
+    <rect x="263" y="140" width="34" height="36" rx="5" class="bft-tok-bg"/>
+    <rect x="303" y="140" width="34" height="36" rx="5" class="bft-tok-bg"/>
+    <rect x="343" y="140" width="34" height="36" rx="5" class="bft-tok-bg"/>
+    <rect x="383" y="140" width="34" height="36" rx="5" class="bft-tok-bg"/>
+    <rect x="423" y="140" width="34" height="36" rx="5" class="bft-tok-bg"/>
+  </g>
+
+  <!-- Sliding highlight behind the active operator -->
+  <rect x="223" y="140" width="34" height="36" rx="5" class="bft-pc"/>
+
+  <!-- Operator characters -->
+  <text x="240" y="158" class="bft-tok bft-t0">*</text>
+  <text x="280" y="158" class="bft-tok bft-t1">&lt;</text>
+  <text x="320" y="158" class="bft-tok bft-t2">*</text>
+  <text x="360" y="158" class="bft-tok bft-t3">[</text>
+  <text x="400" y="158" class="bft-tok bft-t4">&gt;</text>
+  <text x="440" y="158" class="bft-tok">]</text>
+
+  <text x="473" y="158" class="bft-halt" text-anchor="start">halt (8 steps)</text>
+</svg>

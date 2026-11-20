@@ -1,0 +1,82 @@
+---
+import 'katex/dist/katex.min.css';
+import { render } from 'astro:content';
+import Column from './Column.astro';
+import PageHeader from './PageHeader.astro';
+import Toc from './Toc.astro';
+import { formatDate, getGraph, postUrl, readingMinutes, tagUrl, type Post } from '../lib/posts';
+
+interface Props {
+  post: Post;
+}
+
+const { post } = Astro.props;
+const { title, date, updated, tags, toc: tocSetting } = post.data;
+const { Content, headings } = await render(post);
+const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
+const showToc = tocSetting ?? toc.filter((h) => h.depth === 2).length >= 3;
+const minutes = readingMinutes(post.body ?? '');
+
+const { backlinks: allBacklinks } = await getGraph();
+const backlinks = allBacklinks.get(post.id) ?? [];
+
+// Dates in the header read like an instrument log: 2026-11-19
+const isoDay = (d: Date) => d.toISOString().slice(0, 10);
+
+const label = 'mb-3 font-sans text-[13px] leading-5 font-medium text-muted-foreground';
+---
+
+<Column as="article">
+  {showToc && <Toc headings={toc} variant="side" />}
+
+  <PageHeader title={title}>
+    {
+      tags.length > 0 && (
+        <span class="inline-flex flex-wrap items-center gap-1.5">
+          {tags.map((t) => (
+            <a class="rounded-full bg-primary/10 px-2.5 py-0.5 font-sans text-xs leading-4 text-primary transition-colors hover:bg-primary/20" href={tagUrl(t)}>
+              {t}
+            </a>
+          ))}
+        </span>
+      )
+    }
+    <time datetime={date.toISOString()}>{isoDay(date)}</time>
+    {updated && <span>Updated {isoDay(updated)}</span>}
+    <span>{minutes} min read</span>
+  </PageHeader>
+
+  {showToc && <Toc headings={toc} variant="inline" />}
+
+  <div>
+    <Content />
+  </div>
+
+  {
+    backlinks.length > 0 && (
+      <footer class="mt-14">
+        <section aria-labelledby="backlinks-label">
+          <h2 class={label} id="backlinks-label">
+            Linked from
+          </h2>
+          <ul class="grid gap-2.5">
+            {backlinks.map(({ post: from, context }) => (
+              <li>
+                <a class="block rounded-sm border px-3.5 py-3 transition-colors hover:bg-muted" href={postUrl(from.id)}>
+                  <span class="mb-1 block font-sans text-[13px] leading-[18px] font-semibold">{from.data.title}</span>
+                  {context && <span class="block text-sm leading-[22px] text-muted-foreground">{context}</span>}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      </footer>
+    )
+  }
+</Column>
+
+<script>
+  import '../scripts/toc';
+  import '../scripts/code';
+  import '../scripts/lightbox';
+</script>

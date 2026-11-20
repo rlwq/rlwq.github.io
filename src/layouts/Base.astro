@@ -1,0 +1,103 @@
+---
+import '@fontsource-variable/source-serif-4/opsz.css';
+import '@fontsource-variable/source-serif-4/opsz-italic.css';
+import '../styles/global.css';
+import Search from '../components/Search.astro';
+import { site } from '../site.config';
+
+interface Props {
+  title?: string;
+  description?: string;
+  type?: 'website' | 'article';
+  ogImage?: string;
+}
+
+const { title, description = site.description, type = 'website', ogImage = '/og/site.png' } = Astro.props;
+const fullTitle = title ? `${title} — ${site.title}` : site.title;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const ogUrl = new URL(ogImage, Astro.site);
+const path = Astro.url.pathname;
+const isCurrent = (href: string) => (href === '/' ? path === '/' : path.startsWith(href));
+
+// The "lamp" effects (styles/lamp.css, scripts/lamp.ts). Remove a name to switch that effect off.
+const lamp = [
+  'glow', 'afterglow', 'grain', 'type', 'mono', 'ui', 'tape', 'caret',
+  'vignette', 'grille', 'dither', 'ants', 'pixel', 'toc', 'meta',
+].map((f) => `lamp-${f}`).join(' ');
+
+const navItem =
+  'inline-flex cursor-pointer items-center gap-1.5 whitespace-nowrap text-muted-foreground transition-colors hover:text-foreground aria-[current=page]:text-foreground';
+---
+
+<!doctype html>
+<html lang={site.lang} class={lamp}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="alternate" type="application/rss+xml" title={site.title} href="/rss.xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta property="og:type" content={type} />
+    <meta property="og:site_name" content={site.title} />
+    <meta property="og:title" content={title ?? site.title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:type" content="image/png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title ?? site.title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogUrl} />
+    <meta name="theme-color" content="#fafaf9" />
+    <script is:inline>
+      // Theme before first paint, so the page never flashes the wrong colors.
+      (() => {
+        let saved = null;
+        try {
+          saved = localStorage.getItem('theme');
+        } catch {}
+        const dark = saved ? saved === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+        const meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute('content', dark ? '#121212' : '#fafaf9');
+      })();
+    </script>
+  </head>
+  <body>
+    <header data-site-header class="sticky top-0 z-20 flex h-12 items-center justify-between gap-4 border-b bg-background px-5 max-sm:px-4">
+      <nav class="flex items-center gap-5 font-sans text-[13px] max-sm:gap-3" aria-label="Main menu">
+        <a class={navItem} href="/" aria-current={isCurrent('/') ? 'page' : undefined}>Home</a>
+        {
+          site.nav.map((item) => (
+            <a class={navItem} href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>
+              {item.label}
+            </a>
+          ))
+        }
+      </nav>
+      <div class="flex items-center gap-5 font-sans text-[13px] max-sm:gap-3">
+        <button type="button" class={navItem} data-search-open>
+          Search <kbd class="max-sm:hidden">⌘K</kbd>
+        </button>
+        <button type="button" class={navItem} data-theme-toggle aria-label="Switch theme">Theme</button>
+      </div>
+    </header>
+
+    <main>
+      <slot />
+    </main>
+
+    <Search />
+
+    <script>
+      import '../scripts/theme';
+      import '../scripts/search';
+      import '../scripts/lamp';
+    </script>
+  </body>
+</html>
