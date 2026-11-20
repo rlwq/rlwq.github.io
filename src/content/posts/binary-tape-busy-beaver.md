@@ -158,7 +158,7 @@ In other words, halting and divergence propagate from a general program to every
 
 ### Expanding a gap
 
-When we cannot settle a partial program `q` as a whole, we split the family it represents into smaller subsets and reason about each of them separately. An `Expander` pairs such a splitting function with a proof that no halting time is lost:[^10]
+When we cannot settle a partial program `q` as a whole, we split the family it represents into smaller subsets and reason about each of them separately. An `Expander` pairs such a splitting function with a proof that no halting time is lost[^10] and that expansion terminates:[^11]
 
 ```lean
 structure Expander where
@@ -169,10 +169,41 @@ structure Expander where
     c ∈ expand q i → c.gapSum < q.gapSum
 ```
 
-The simplest way to expand a gap of size `k` is to branch on its first command: `<(k-1)?`, `>(k-1)?`, `*(k-1)?`, or a loop `[a?]b?` with $a + b = k - 2$.[^11]
+The simplest way to expand a gap of size `k` is to branch on its first command: `<(k-1)?`, `>(k-1)?`, `*(k-1)?`, or a loop `[a?]b?` with $a + b = k - 2$.[^12]
 
 ![Expanding a gap of size 4 one command at a time](./attachments/bf-expand.svg)
 *Expanding `4?` one command at a time. `[2?]` halts in a single step, whatever its body.*
+
+## Deciders
+
+To draw any conclusion about a partial program — that it halts, that it never does, or that nothing can be said until one of its gaps is filled — we need a *decider*. Its conclusion is a `Verdict`:
+
+```lean
+inductive Verdict (q : Program) where
+  | halts    (steps : Nat) (h : q ⇓ steps)
+  | diverges (h : q⇑)
+  | stuck    (gap : Fin q.numGaps)
+  | unknown
+```
+
+TODO: по фразе на вердикт. `halts t h` и `diverges h` — программа решена целиком (вместе со всеми заполнениями пробелов), и вердикт сам несёт доказательство. `stuck i` — исполнение упёрлось в пробел номер `i`: вот его и раскрываем. `unknown` — decider сдался.
+
+```lean
+def Decider := (q : Program) → Verdict q
+```
+
+TODO: главная мысль — decider это просто функция, доказательства едут внутри вердиктов: неправильный вердикт нельзя даже сконструировать. `stuck` и `unknown` ничего не обещают, поэтому доказательств в них нет. Связка: decider говорит *где* раскрывать, expander — *как*.
+
+TODO: deciders комбинируются через `<|>` — следующий спрашивается, только если предыдущий ответил `unknown`. Пример цепочки для BB(12–14):
+
+```lean
+def fullChain : Decider :=
+  Decider.simulator Zipper 300 <|> .translatedUpTo 50 24 <|> .windows 1 200 <|>
+    .translated 300 24 <|> .translatedUpTo 500 50 <|> .windows 2 200 <|> .blocksUpTo 2000 <|>
+    .translated 2000 132 <|> .translated 2000 144
+```
+
+TODO: одна фраза — сначала дешёвые, потом дорогие; сами deciders разбираются ниже. (Тонкость: `stuck` от первого decider тоже не перебивается — дальше по цепочке не идём, сразу раскрываем. Можно в сноску.)
 
 [^1]: Non-halting machines are not counted — otherwise the answer would trivially be infinite. Separating them from machines that merely run for a very long time is what makes the function [uncomputable](https://en.wikipedia.org/wiki/Halting_problem).
 [^2]: Both `[` and `]` can be thought of as a single operation — a conditional jump — so their cost is always 1 step regardless of the outcome.
@@ -183,5 +214,6 @@ The simplest way to expand a gap of size `k` is to branch on its first command: 
 [^7]: `Option.bind` composes steps [monadically](https://en.wikipedia.org/wiki/Monad_(functional_programming)): if any intermediate step returns `none`, the rest of the chain short-circuits to `none`.
 [^8]: Possibly none — refinement is reflexive, so every program refines itself (`p ⊑ p`).
 [^9]: The replacement programs may themselves contain gaps — for instance, `*[2?] ⊑ 1?[2?]`.
-[^10]: Allowing `p ~ p'` instead of `p = p'` lets a stronger expander drop entire branches, as long as every dropped program has an equivalent twin among the remaining children. For example, swapping every `<` with `>` gives an equivalent program, since the blank tape is symmetric, so the expander can keep only programs whose first move is `<`.
-[^11]: The expander actually used in the code is considerably more involved — for instance, it skips mirrored programs.
+[^10]: Allowing `p ~ p'` instead of `p = p'` lets the expander drop entire branches, as long as every dropped program has an equivalent twin among the remaining children. For example, swapping every `<` with `>` gives an equivalent program, since the blank tape is symmetric, so it can keep only programs whose first move is `<`.
+[^11]: `decreasing` guarantees that expansion cannot go on forever: every child is strictly less unknown than its parent, measured by `gapSum` — the total size of its gaps.
+[^12]: The expander actually used in the code is considerably more involved — for instance, it skips mirrored programs.
