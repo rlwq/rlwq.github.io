@@ -265,7 +265,8 @@ Any other value up to length 14 is proved the same way. Here they all are, toget
 | 13  |  67,030,785 |              120 | `*[<*<*[>*>]<]`   |
 | 14  | 304,036,170 |              158 | `*[<<*[>>>*>]<]`  |
 
-All of these values come from the same search: the effort goes into a few general deciders, each proved sound once, rather than into individual programs. The full Lean 4 formalisation is available at [github.com/rlwq/BBBTape](https://github.com/rlwq/BBBTape).
+All of these values come from the same search: the effort goes into a few general deciders, each proved sound once.
+The full Lean 4 formalisation is available at [github.com/rlwq/BBBTape](https://github.com/rlwq/BBBTape).
 
 [^1]: Non-halting machines are not counted — otherwise the answer would trivially be infinite. Separating them from machines that merely run for a very long time is what makes the function [uncomputable](https://en.wikipedia.org/wiki/Halting_problem).
 [^2]: Both `[` and `]` can be thought of as a single operation — a conditional jump — so their cost is always 1 step regardless of the outcome.
