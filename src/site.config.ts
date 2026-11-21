@@ -1,6 +1,6 @@
 // Site-wide settings: name, description, menu.
 export const site = {
-  title: 'Carnavschi Serghei',
+  title: 'rlwq blog',
   tagline: 'Long-form writing on systems, programming languages and applied AI.',
   description: 'In-depth articles on systems programming, programming languages and applied AI — with code, charts and notes in the margins.',
   author: 'Carnavschi Serghei',

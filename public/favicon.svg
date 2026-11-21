@@ -1,4 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="7" fill="#161616" />
-  <text x="16" y="23.5" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="21" font-style="italic" fill="#f0a04b">S</text>
+  <defs>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2.5" />
+    </filter>
+  </defs>
+  <rect x="0.5" y="0.5" width="31" height="31" rx="6" fill="#161616" stroke="#292826" stroke-width="1" />
+  <path d="M6 10h2v2H6zm2 2h2v2H8zm2 2h2v4h-2zm-2 4h2v2H8zm-2 2h2v2H6z" fill="#a19e98" />
+  <rect x="16" y="8" width="8" height="16" fill="#f0a04b" opacity="0.45" filter="url(#glow)" />
+  <rect x="16" y="8" width="8" height="16" fill="#f0a04b" />
 </svg>
