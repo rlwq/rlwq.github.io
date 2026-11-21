@@ -1,36 +1,31 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 198" width="680" height="198" role="img" aria-label="Animated execution of *<*[>] on a bi-infinite binary tape">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 156" width="620" height="156" role="img" aria-label="Animated execution of *&lt;*[&gt;] on a bi-infinite binary tape">
   <defs>
-    <linearGradient id="fadeGrad" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0%"   stop-color="#000000"/>
-      <stop offset="12%"  stop-color="#ffffff"/>
-      <stop offset="88%"  stop-color="#ffffff"/>
-      <stop offset="100%" stop-color="#000000"/>
-    </linearGradient>
-    <mask id="tapeMask">
-      <rect x="54" y="54" width="572" height="60" fill="url(#fadeGrad)"/>
-    </mask>
+    <filter id="glow" x="-40%" y="-80%" width="180%" height="260%"><feGaussianBlur in="SourceGraphic" stdDeviation="2.4" result="b"/><feComponentTransfer in="b" result="h"><feFuncA type="linear" slope="0.6"/></feComponentTransfer><feMerge><feMergeNode in="h"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <pattern id="tf0" width="8" height="8" patternUnits="userSpaceOnUse"><rect x="0" y="0" width="2" height="2" fill="#fff"/><rect x="4" y="4" width="2" height="2" fill="#fff"/></pattern>
+    <pattern id="tf1" width="8" height="8" patternUnits="userSpaceOnUse"><rect x="0" y="0" width="2" height="2" fill="#fff"/><rect x="4" y="0" width="2" height="2" fill="#fff"/><rect x="2" y="2" width="2" height="2" fill="#fff"/><rect x="0" y="4" width="2" height="2" fill="#fff"/><rect x="4" y="4" width="2" height="2" fill="#fff"/><rect x="6" y="6" width="2" height="2" fill="#fff"/></pattern>
+    <pattern id="tf2" width="8" height="8" patternUnits="userSpaceOnUse"><rect x="0" y="0" width="2" height="2" fill="#fff"/><rect x="2" y="0" width="2" height="2" fill="#fff"/><rect x="4" y="0" width="2" height="2" fill="#fff"/><rect x="2" y="2" width="2" height="2" fill="#fff"/><rect x="6" y="2" width="2" height="2" fill="#fff"/><rect x="0" y="4" width="2" height="2" fill="#fff"/><rect x="4" y="4" width="2" height="2" fill="#fff"/><rect x="6" y="4" width="2" height="2" fill="#fff"/><rect x="2" y="6" width="2" height="2" fill="#fff"/><rect x="6" y="6" width="2" height="2" fill="#fff"/></pattern>
+    <pattern id="tf3" width="8" height="8" patternUnits="userSpaceOnUse"><rect x="0" y="0" width="2" height="2" fill="#fff"/><rect x="2" y="0" width="2" height="2" fill="#fff"/><rect x="4" y="0" width="2" height="2" fill="#fff"/><rect x="6" y="0" width="2" height="2" fill="#fff"/><rect x="0" y="2" width="2" height="2" fill="#fff"/><rect x="2" y="2" width="2" height="2" fill="#fff"/><rect x="6" y="2" width="2" height="2" fill="#fff"/><rect x="0" y="4" width="2" height="2" fill="#fff"/><rect x="2" y="4" width="2" height="2" fill="#fff"/><rect x="4" y="4" width="2" height="2" fill="#fff"/><rect x="6" y="4" width="2" height="2" fill="#fff"/><rect x="2" y="6" width="2" height="2" fill="#fff"/><rect x="4" y="6" width="2" height="2" fill="#fff"/><rect x="6" y="6" width="2" height="2" fill="#fff"/></pattern>
+    <mask id="tapeMask" maskUnits="userSpaceOnUse"><rect x="102" y="39" width="416" height="50" fill="#fff"/><rect x="46" y="39" width="14" height="50" fill="url(#tf0)"/><rect x="560" y="39" width="14" height="50" fill="url(#tf0)"/><rect x="60" y="39" width="14" height="50" fill="url(#tf1)"/><rect x="546" y="39" width="14" height="50" fill="url(#tf1)"/><rect x="74" y="39" width="14" height="50" fill="url(#tf2)"/><rect x="532" y="39" width="14" height="50" fill="url(#tf2)"/><rect x="88" y="39" width="14" height="50" fill="url(#tf3)"/><rect x="518" y="39" width="14" height="50" fill="url(#tf3)"/></mask>
     <style>
-      .bft-ribbon { fill: var(--muted, #f2f1ee); }
-      .bft-grid   { stroke: var(--border, #e2e0dc); stroke-width: 1.25; }
-      .bft-z      { font: 400 20px var(--font-mono, ui-monospace, 'SF Mono', Menlo, Consolas, monospace); fill: var(--muted-foreground, #5f5d59); opacity: 0.6; text-anchor: middle; dominant-baseline: central; }
-      .bft-o      { font: 700 20px var(--font-mono, ui-monospace, 'SF Mono', Menlo, Consolas, monospace); fill: var(--foreground, #1c1b1a); text-anchor: middle; dominant-baseline: central; }
-      .bft-accent { fill: var(--primary, #b45309); }
-      .bft-frame  { fill: none; stroke: var(--primary, #b45309); stroke-width: 2; }
-      .bft-lbl    { font: 600 13.5px var(--font-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif); fill: var(--primary, #b45309); text-anchor: middle; letter-spacing: 0.02em; }
-      .bft-dot    { font: 400 18px var(--font-mono, ui-monospace, 'SF Mono', Menlo, Consolas, monospace); fill: var(--muted-foreground, #5f5d59); opacity: 0.55; text-anchor: middle; dominant-baseline: central; }
-
-      .bft-tok-bg { fill: var(--muted, #f2f1ee); stroke: var(--border, #e2e0dc); stroke-width: 1.1; }
-      .bft-tok    { font: 600 17px var(--font-mono, ui-monospace, 'SF Mono', Menlo, Consolas, monospace); fill: var(--foreground, #1c1b1a); text-anchor: middle; dominant-baseline: central; }
-      .bft-meta   { font: 500 12.5px var(--font-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif); fill: var(--muted-foreground, #5f5d59); dominant-baseline: central; }
-      .bft-halt   { font: 600 12.5px var(--font-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif); fill: var(--tip, #3d7d3a); dominant-baseline: central; opacity: 0; animation: bft-halt 10s ease-in-out infinite; }
-      .bft-pc     { fill: color-mix(in srgb, var(--primary, #b45309) 16%, transparent); stroke: var(--primary, #b45309); stroke-width: 1.75; opacity: 0; animation: bft-pc 10s ease-in-out infinite; }
+      .bft-cell  { fill: var(--muted, #1a1a19); }
+      .bft-grid  { stroke: var(--border, #292826); stroke-width: 1; shape-rendering: crispEdges; }
+      .bft-z     { font: 400 18px var(--font-mono, 'IBM Plex Mono', ui-monospace, monospace); fill: var(--muted-foreground, #a19e98); opacity: 0.45; text-anchor: middle; dominant-baseline: central; }
+      .bft-o     { font: 500 18px var(--font-mono, 'IBM Plex Mono', ui-monospace, monospace); fill: var(--foreground, #e7e5e2); text-anchor: middle; dominant-baseline: central; }
+      .bft-dots  { font: 400 16px var(--font-mono, 'IBM Plex Mono', ui-monospace, monospace); fill: var(--muted-foreground, #a19e98); opacity: 0.5; text-anchor: middle; dominant-baseline: central; }
+      .bft-acc   { fill: var(--primary, #f0a04b); }
+      .bft-frame { fill: none; stroke: var(--primary, #f0a04b); stroke-width: 1.5; }
+      .bft-lbl   { font: 500 10.5px var(--font-mono, 'IBM Plex Mono', ui-monospace, monospace); letter-spacing: 0.06em; fill: var(--primary, #f0a04b); text-anchor: middle; dominant-baseline: central; }
+      .bft-meta  { font: 400 10.5px var(--font-mono, 'IBM Plex Mono', ui-monospace, monospace); letter-spacing: 0.06em; fill: var(--muted-foreground, #a19e98); dominant-baseline: central; }
+      .bft-tok-bg { fill: var(--muted, #1a1a19); stroke: var(--border, #292826); stroke-width: 1; }
+      .bft-tok   { font: 500 15px var(--font-mono, 'IBM Plex Mono', ui-monospace, monospace); fill: var(--foreground, #e7e5e2); text-anchor: middle; dominant-baseline: central; }
+      .bft-halt  { font: 500 10.5px var(--font-mono, 'IBM Plex Mono', ui-monospace, monospace); letter-spacing: 0.06em; fill: var(--primary, #f0a04b); dominant-baseline: central; opacity: 0; animation: bft-halt 10s ease-in-out infinite; }
+      .bft-pc    { fill: color-mix(in srgb, var(--primary, #f0a04b) 14%, transparent); stroke: var(--primary, #f0a04b); stroke-width: 1; opacity: 0; animation: bft-pc 10s ease-in-out infinite; }
 
       .bft-cursor { animation: bft-cursor 10s ease-in-out infinite; }
       .bft-c0-z   { animation: bft-c0-z 10s linear infinite; }
       .bft-c0-o   { opacity: 0; animation: bft-c0-o 10s linear infinite; }
       .bft-cm1-z  { animation: bft-cm1-z 10s linear infinite; }
       .bft-cm1-o  { opacity: 0; animation: bft-cm1-o 10s linear infinite; }
-
       .bft-t0 { animation: bft-t0 10s linear infinite; }
       .bft-t1 { animation: bft-t1 10s linear infinite; }
       .bft-t2 { animation: bft-t2 10s linear infinite; }
@@ -40,160 +35,104 @@
       /* Cursor slides: 0 -> -1 (step 2) -> 0 (step 5) -> +1 (step 7) -> reset */
       @keyframes bft-cursor {
         0%, 18%    { transform: translateX(0px); }
-        22.5%, 45% { transform: translateX(-52px); }
+        22.5%, 45% { transform: translateX(-48px); }
         49.5%, 63% { transform: translateX(0px); }
-        67.5%, 94% { transform: translateX(52px); }
+        67.5%, 94% { transform: translateX(48px); }
         98%, 100%  { transform: translateX(0px); }
       }
-
       /* Cell 0 flips 0 -> 1 at step 1 (10%), resets at 95% */
-      @keyframes bft-c0-z {
-        0%, 9.5%   { opacity: 0.6; }
-        11%, 94.5% { opacity: 0; }
-        96.5%, 100%{ opacity: 0.6; }
-      }
-      @keyframes bft-c0-o {
-        0%, 9.5%   { opacity: 0; }
-        11%, 94.5% { opacity: 1; }
-        96.5%, 100%{ opacity: 0; }
-      }
-
+      @keyframes bft-c0-z { 0%, 9.5% { opacity: 0.45; } 11%, 94.5% { opacity: 0; } 96.5%, 100% { opacity: 0.45; } }
+      @keyframes bft-c0-o { 0%, 9.5% { opacity: 0; } 11%, 94.5% { opacity: 1; } 96.5%, 100% { opacity: 0; } }
       /* Cell -1 flips 0 -> 1 at step 3 (28%), resets at 95% */
-      @keyframes bft-cm1-z {
-        0%, 27.5%  { opacity: 0.6; }
-        29%, 94.5% { opacity: 0; }
-        96.5%, 100%{ opacity: 0.6; }
-      }
-      @keyframes bft-cm1-o {
-        0%, 27.5%  { opacity: 0; }
-        29%, 94.5% { opacity: 1; }
-        96.5%, 100%{ opacity: 0; }
-      }
-
-      /* Program highlight box: idx 0, 1, 2, 3, 4, 3, 4, 3 then off */
+      @keyframes bft-cm1-z { 0%, 27.5% { opacity: 0.45; } 29%, 94.5% { opacity: 0; } 96.5%, 100% { opacity: 0.45; } }
+      @keyframes bft-cm1-o { 0%, 27.5% { opacity: 0; } 29%, 94.5% { opacity: 1; } 96.5%, 100% { opacity: 0; } }
+      /* Program highlight: idx 0, 1, 2, 3, 4, 3, 4, 3 then off */
       @keyframes bft-pc {
-        0%, 6.5%   { opacity: 0; transform: translateX(0px); }
-        8%, 15.5%  { opacity: 1; transform: translateX(0px); }
-        17.5%, 24.5% { opacity: 1; transform: translateX(40px); }
-        26.5%, 33.5% { opacity: 1; transform: translateX(80px); }
-        35.5%, 42.5% { opacity: 1; transform: translateX(120px); }
-        44.5%, 51.5% { opacity: 1; transform: translateX(160px); }
-        53.5%, 60.5% { opacity: 1; transform: translateX(120px); }
-        62.5%, 69.5% { opacity: 1; transform: translateX(160px); }
-        71.5%, 78.5% { opacity: 1; transform: translateX(120px); }
-        80.5%, 100%  { opacity: 0; transform: translateX(120px); }
+        0%, 6.5%     { opacity: 0; transform: translateX(0px); }
+        8%, 15.5%    { opacity: 1; transform: translateX(0px); }
+        17.5%, 24.5% { opacity: 1; transform: translateX(36px); }
+        26.5%, 33.5% { opacity: 1; transform: translateX(72px); }
+        35.5%, 42.5% { opacity: 1; transform: translateX(108px); }
+        44.5%, 51.5% { opacity: 1; transform: translateX(144px); }
+        53.5%, 60.5% { opacity: 1; transform: translateX(108px); }
+        62.5%, 69.5% { opacity: 1; transform: translateX(144px); }
+        71.5%, 78.5% { opacity: 1; transform: translateX(108px); }
+        80.5%, 100%  { opacity: 0; transform: translateX(108px); }
       }
-
-      /* Active operator text tint */
-      @keyframes bft-t0 {
-        0%, 7%, 16.5%, 100% { fill: var(--foreground, #1c1b1a); }
-        8%, 15.5%           { fill: var(--primary, #b45309); }
-      }
-      @keyframes bft-t1 {
-        0%, 16.5%, 25.5%, 100% { fill: var(--foreground, #1c1b1a); }
-        17.5%, 24.5%           { fill: var(--primary, #b45309); }
-      }
-      @keyframes bft-t2 {
-        0%, 25.5%, 34.5%, 100% { fill: var(--foreground, #1c1b1a); }
-        26.5%, 33.5%           { fill: var(--primary, #b45309); }
-      }
+      /* Active command lights up */
+      @keyframes bft-t0 { 0%, 7%, 16.5%, 100% { fill: var(--foreground, #e7e5e2); } 8%, 15.5% { fill: var(--primary, #f0a04b); } }
+      @keyframes bft-t1 { 0%, 16.5%, 25.5%, 100% { fill: var(--foreground, #e7e5e2); } 17.5%, 24.5% { fill: var(--primary, #f0a04b); } }
+      @keyframes bft-t2 { 0%, 25.5%, 34.5%, 100% { fill: var(--foreground, #e7e5e2); } 26.5%, 33.5% { fill: var(--primary, #f0a04b); } }
       @keyframes bft-t3 {
-        0%, 34.5%, 43.5%, 52.5%, 61.5%, 70.5%, 79.5%, 100% { fill: var(--foreground, #1c1b1a); }
-        35.5%, 42.5%, 53.5%, 60.5%, 71.5%, 78.5%           { fill: var(--primary, #b45309); }
+        0%, 34.5%, 43.5%, 52.5%, 61.5%, 70.5%, 79.5%, 100% { fill: var(--foreground, #e7e5e2); }
+        35.5%, 42.5%, 53.5%, 60.5%, 71.5%, 78.5%           { fill: var(--primary, #f0a04b); }
       }
       @keyframes bft-t4 {
-        0%, 43.5%, 52.5%, 61.5%, 70.5%, 100% { fill: var(--foreground, #1c1b1a); }
-        44.5%, 51.5%, 62.5%, 69.5%           { fill: var(--primary, #b45309); }
+        0%, 43.5%, 52.5%, 61.5%, 70.5%, 100% { fill: var(--foreground, #e7e5e2); }
+        44.5%, 51.5%, 62.5%, 69.5%           { fill: var(--primary, #f0a04b); }
       }
-
       /* Halt label after step 8 */
-      @keyframes bft-halt {
-        0%, 79%    { opacity: 0; }
-        81%, 93%   { opacity: 1; }
-        95%, 100%  { opacity: 0; }
-      }
+      @keyframes bft-halt { 0%, 79% { opacity: 0; } 81%, 93% { opacity: 1; } 95%, 100% { opacity: 0; } }
 
       @media (prefers-reduced-motion: reduce) {
         .bft-cursor, .bft-c0-z, .bft-c0-o, .bft-cm1-z, .bft-cm1-o,
-        .bft-pc, .bft-t0, .bft-t1, .bft-t2, .bft-t3, .bft-t4, .bft-halt {
-          animation: none !important;
-        }
+        .bft-pc, .bft-t0, .bft-t1, .bft-t2, .bft-t3, .bft-t4, .bft-halt { animation: none !important; }
         .bft-c0-z, .bft-cm1-z { opacity: 0; }
-        .bft-c0-o, .bft-cm1-o { opacity: 1; }
-        .bft-pc { opacity: 1; transform: translateX(120px); }
+        .bft-c0-o, .bft-cm1-o, .bft-halt { opacity: 1; }
+        .bft-pc { opacity: 1; transform: translateX(108px); }
       }
     </style>
   </defs>
-
-  <!-- Tape strip with true alpha fade on both ends -->
   <g mask="url(#tapeMask)">
-    <rect x="54" y="58" width="572" height="52" class="bft-ribbon"/>
+    <rect x="46" y="40" width="528" height="48" class="bft-cell"/>
     <g class="bft-grid">
-      <line x1="54"  y1="58"  x2="626" y2="58"/>
-      <line x1="54"  y1="110" x2="626" y2="110"/>
-      <line x1="106" y1="58"  x2="106" y2="110"/>
-      <line x1="158" y1="58"  x2="158" y2="110"/>
-      <line x1="210" y1="58"  x2="210" y2="110"/>
-      <line x1="262" y1="58"  x2="262" y2="110"/>
-      <line x1="314" y1="58"  x2="314" y2="110"/>
-      <line x1="366" y1="58"  x2="366" y2="110"/>
-      <line x1="418" y1="58"  x2="418" y2="110"/>
-      <line x1="470" y1="58"  x2="470" y2="110"/>
-      <line x1="522" y1="58"  x2="522" y2="110"/>
-      <line x1="574" y1="58"  x2="574" y2="110"/>
+      <line x1="46" y1="40.5" x2="574" y2="40.5"/>
+      <line x1="46" y1="87.5" x2="574" y2="87.5"/>
+      <line x1="94.5" y1="40" x2="94.5" y2="88"/>
+      <line x1="142.5" y1="40" x2="142.5" y2="88"/>
+      <line x1="190.5" y1="40" x2="190.5" y2="88"/>
+      <line x1="238.5" y1="40" x2="238.5" y2="88"/>
+      <line x1="286.5" y1="40" x2="286.5" y2="88"/>
+      <line x1="334.5" y1="40" x2="334.5" y2="88"/>
+      <line x1="382.5" y1="40" x2="382.5" y2="88"/>
+      <line x1="430.5" y1="40" x2="430.5" y2="88"/>
+      <line x1="478.5" y1="40" x2="478.5" y2="88"/>
+      <line x1="526.5" y1="40" x2="526.5" y2="88"/>
     </g>
-
-    <!-- Static zero cells -->
-    <text x="80"  y="84" class="bft-z">0</text>
-    <text x="132" y="84" class="bft-z">0</text>
-    <text x="184" y="84" class="bft-z">0</text>
-    <text x="236" y="84" class="bft-z">0</text>
-    <!-- Cell -1 (flips at step 3) -->
-    <text x="288" y="84" class="bft-z bft-cm1-z">0</text>
-    <text x="288" y="84" class="bft-o bft-cm1-o">1</text>
-    <!-- Cell 0 (flips at step 1) -->
-    <text x="340" y="84" class="bft-z bft-c0-z">0</text>
-    <text x="340" y="84" class="bft-o bft-c0-o">1</text>
-    <!-- Static zero cells to the right -->
-    <text x="392" y="84" class="bft-z">0</text>
-    <text x="444" y="84" class="bft-z">0</text>
-    <text x="496" y="84" class="bft-z">0</text>
-    <text x="548" y="84" class="bft-z">0</text>
-    <text x="600" y="84" class="bft-z">0</text>
+    <text x="70.0" y="64.0" class="bft-z">0</text>
+    <text x="118.0" y="64.0" class="bft-z">0</text>
+    <text x="166.0" y="64.0" class="bft-z">0</text>
+    <text x="214.0" y="64.0" class="bft-z">0</text>
+    <text x="262.0" y="64.0" class="bft-z bft-cm1-z">0</text>
+    <text x="262.0" y="64.0" class="bft-o bft-cm1-o" filter="url(#glow)">1</text>
+    <text x="310.0" y="64.0" class="bft-z bft-c0-z">0</text>
+    <text x="310.0" y="64.0" class="bft-o bft-c0-o" filter="url(#glow)">1</text>
+    <text x="358.0" y="64.0" class="bft-z">0</text>
+    <text x="406.0" y="64.0" class="bft-z">0</text>
+    <text x="454.0" y="64.0" class="bft-z">0</text>
+    <text x="502.0" y="64.0" class="bft-z">0</text>
+    <text x="550.0" y="64.0" class="bft-z">0</text>
   </g>
-
-  <text x="32"  y="84" class="bft-dot">…</text>
-  <text x="648" y="84" class="bft-dot">…</text>
-
-  <!-- Animated cursor: label + pointer + active cell border -->
+  <text x="24" y="64.0" class="bft-dots">…</text>
+  <text x="596" y="64.0" class="bft-dots">…</text>
   <g class="bft-cursor">
-    <text x="340" y="23" class="bft-lbl">cursor</text>
-    <polygon points="328,32 352,32 340,49" class="bft-accent"/>
-    <rect x="314" y="58" width="52" height="52" class="bft-frame"/>
+    <text x="310" y="10" class="bft-lbl" filter="url(#glow)">CURSOR</text>
+    <g filter="url(#glow)"><rect x="305" y="22" width="10" height="2" class="bft-acc"/><rect x="307" y="24" width="6" height="2" class="bft-acc"/><rect x="309" y="26" width="2" height="2" class="bft-acc"/></g>
+    <rect x="286.75" y="40.75" width="46.5" height="46.5" class="bft-frame" filter="url(#glow)"/>
   </g>
-
-  <!-- Program bar at the bottom: * < * [ > ] -->
-  <text x="207" y="158" class="bft-meta" text-anchor="end">program</text>
-
-  <g>
-    <rect x="223" y="140" width="34" height="36" rx="5" class="bft-tok-bg"/>
-    <rect x="263" y="140" width="34" height="36" rx="5" class="bft-tok-bg"/>
-    <rect x="303" y="140" width="34" height="36" rx="5" class="bft-tok-bg"/>
-    <rect x="343" y="140" width="34" height="36" rx="5" class="bft-tok-bg"/>
-    <rect x="383" y="140" width="34" height="36" rx="5" class="bft-tok-bg"/>
-    <rect x="423" y="140" width="34" height="36" rx="5" class="bft-tok-bg"/>
-  </g>
-
-  <!-- Sliding highlight behind the active operator -->
-  <rect x="223" y="140" width="34" height="36" rx="5" class="bft-pc"/>
-
-  <!-- Operator characters -->
-  <text x="240" y="158" class="bft-tok bft-t0">*</text>
-  <text x="280" y="158" class="bft-tok bft-t1">&lt;</text>
-  <text x="320" y="158" class="bft-tok bft-t2">*</text>
-  <text x="360" y="158" class="bft-tok bft-t3">[</text>
-  <text x="400" y="158" class="bft-tok bft-t4">&gt;</text>
-  <text x="440" y="158" class="bft-tok">]</text>
-
-  <text x="473" y="158" class="bft-halt" text-anchor="start">halt (8 steps)</text>
+  <text x="191" y="128.0" class="bft-meta" text-anchor="end" style="text-anchor: end">PROGRAM</text>
+  <rect x="205.5" y="112.5" width="29" height="31" rx="3" class="bft-tok-bg"/>
+  <rect x="241.5" y="112.5" width="29" height="31" rx="3" class="bft-tok-bg"/>
+  <rect x="277.5" y="112.5" width="29" height="31" rx="3" class="bft-tok-bg"/>
+  <rect x="313.5" y="112.5" width="29" height="31" rx="3" class="bft-tok-bg"/>
+  <rect x="349.5" y="112.5" width="29" height="31" rx="3" class="bft-tok-bg"/>
+  <rect x="385.5" y="112.5" width="29" height="31" rx="3" class="bft-tok-bg"/>
+  <rect x="205.5" y="112.5" width="29" height="31" rx="3" class="bft-pc" filter="url(#glow)"/>
+  <text x="220.0" y="128.0" class="bft-tok bft-t0">*</text>
+  <text x="256.0" y="128.0" class="bft-tok bft-t1">&lt;</text>
+  <text x="292.0" y="128.0" class="bft-tok bft-t2">*</text>
+  <text x="328.0" y="128.0" class="bft-tok bft-t3">[</text>
+  <text x="364.0" y="128.0" class="bft-tok bft-t4">&gt;</text>
+  <text x="400.0" y="128.0" class="bft-tok">]</text>
+  <text x="431" y="128.0" class="bft-halt" filter="url(#glow)">HALT · 8 STEPS</text>
 </svg>

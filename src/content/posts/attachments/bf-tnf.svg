@@ -1,24 +1,25 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 552 248" width="552" height="248" role="img" aria-label="Two levels of Tree Normal Form expansion from a size-3 gap">
   <defs>
-    <marker id="tnfArr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <filter id="glow" x="-40%" y="-80%" width="180%" height="260%"><feGaussianBlur in="SourceGraphic" stdDeviation="2.4" result="b"/><feComponentTransfer in="b" result="h"><feFuncA type="linear" slope="0.6"/></feComponentTransfer><feMerge><feMergeNode in="h"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <marker id="tnfArr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse">
       <path d="M 1 1.5 L 9 5 L 1 8.5 z" class="tnf-arr"/>
     </marker>
-    <marker id="tnfArrFade" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <marker id="tnfArrFade" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse">
       <path d="M 1 1.5 L 9 5 L 1 8.5 z" class="tnf-arr-fade"/>
     </marker>
     <style>
-      .tnf-node      { fill: var(--muted, #f2f1ee); stroke: var(--border, #e2e0dc); stroke-width: 1.25; }
-      .tnf-pruned    { fill: none; stroke: var(--border, #e2e0dc); stroke-width: 1.25; stroke-dasharray: 4 3; opacity: 0.75; }
-      .tnf-halt      { fill: var(--muted, #f2f1ee); stroke: var(--tip, #3d7d3a); stroke-width: 1.45; }
-      .tnf-code      { font: 600 13px var(--font-mono, ui-monospace, 'SF Mono', Menlo, Consolas, monospace); fill: var(--foreground, #1c1b1a); text-anchor: middle; dominant-baseline: central; }
-      .tnf-code-fade { font: 500 13px var(--font-mono, ui-monospace, 'SF Mono', Menlo, Consolas, monospace); fill: var(--muted-foreground, #5f5d59); text-anchor: middle; dominant-baseline: central; opacity: 0.65; }
-      .tnf-edge      { fill: none; stroke: var(--muted-foreground, #5f5d59); stroke-width: 1.35; opacity: 0.72; }
-      .tnf-edge-fade { fill: none; stroke: var(--muted-foreground, #5f5d59); stroke-width: 1.25; stroke-dasharray: 4 3; opacity: 0.42; }
-      .tnf-arr       { fill: var(--muted-foreground, #5f5d59); opacity: 0.72; }
-      .tnf-arr-fade  { fill: var(--muted-foreground, #5f5d59); opacity: 0.42; }
-      .tnf-sub       { font: 500 11.5px var(--font-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif); fill: var(--muted-foreground, #5f5d59); text-anchor: middle; }
-      .tnf-sub-end   { font: 500 11.5px var(--font-mono, ui-monospace, 'SF Mono', Menlo, Consolas, monospace); fill: var(--muted-foreground, #5f5d59); text-anchor: end; }
-      .tnf-sub-halt  { font: 600 11.5px var(--font-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif); fill: var(--tip, #3d7d3a); text-anchor: middle; }
+      .tnf-node { fill: var(--muted, #1a1a19); stroke: var(--border, #292826); stroke-width: 1; }
+      .tnf-halt { fill: var(--muted, #1a1a19); stroke: var(--primary, #f0a04b); stroke-width: 1; }
+      .tnf-code { font: 500 13px var(--font-mono, 'IBM Plex Mono', ui-monospace, monospace); fill: var(--foreground, #e7e5e2); text-anchor: middle; dominant-baseline: central; }
+      .tnf-edge { fill: none; stroke: var(--muted-foreground, #a19e98); stroke-width: 1; opacity: 0.55; }
+      .tnf-arr { fill: var(--muted-foreground, #a19e98); opacity: 0.55; }
+      .tnf-sub { font: 400 10px var(--font-mono, 'IBM Plex Mono', ui-monospace, monospace); letter-spacing: 0.06em; fill: var(--muted-foreground, #a19e98); text-anchor: middle; }
+      .tnf-sub-halt { font: 500 10px var(--font-mono, 'IBM Plex Mono', ui-monospace, monospace); letter-spacing: 0.06em; fill: var(--primary, #f0a04b); text-anchor: middle; }
+      .tnf-pruned { fill: none; stroke: var(--border, #292826); stroke-width: 1; stroke-dasharray: 2 2; }
+      .tnf-code-fade { font: 500 13px var(--font-mono, 'IBM Plex Mono', ui-monospace, monospace); fill: var(--muted-foreground, #a19e98); text-anchor: middle; dominant-baseline: central; opacity: 0.7; }
+      .tnf-edge-fade { fill: none; stroke: var(--muted-foreground, #a19e98); stroke-width: 1; stroke-dasharray: 2 2; opacity: 0.4; }
+      .tnf-arr-fade { fill: var(--muted-foreground, #a19e98); opacity: 0.4; }
+      .tnf-sub-end { font: 400 11px var(--font-mono, 'IBM Plex Mono', ui-monospace, monospace); fill: var(--muted-foreground, #a19e98); text-anchor: end; }
     </style>
   </defs>
 
@@ -41,58 +42,58 @@
 
   <!-- Root: 3? -->
   <g>
-    <rect x="248" y="10" width="56" height="32" rx="6" class="tnf-node"/>
+    <rect x="248" y="10" width="56" height="32" rx="3" class="tnf-node"/>
     <text x="276" y="26" class="tnf-code">3?</text>
   </g>
 
   <!-- Level 1 -->
   <g>
-    <rect x="102" y="86" width="64" height="32" rx="6" class="tnf-node"/>
+    <rect x="102" y="86" width="64" height="32" rx="3" class="tnf-node"/>
     <text x="134" y="102" class="tnf-code">&lt;2?</text>
   </g>
   <g>
-    <rect x="192" y="86" width="64" height="32" rx="6" class="tnf-pruned"/>
+    <rect x="192" y="86" width="64" height="32" rx="3" class="tnf-pruned"/>
     <text x="224" y="102" class="tnf-code-fade">&gt;2?</text>
-    <text x="224" y="133" class="tnf-sub">mirror</text>
+    <text x="224" y="133" class="tnf-sub">MIRROR</text>
   </g>
   <g>
-    <rect x="280" y="86" width="64" height="32" rx="6" class="tnf-node"/>
+    <rect x="280" y="86" width="64" height="32" rx="3" class="tnf-node"/>
     <text x="312" y="102" class="tnf-code">*2?</text>
     <text x="312" y="133" class="tnf-sub">…</text>
   </g>
   <g>
-    <rect x="366" y="86" width="76" height="32" rx="6" class="tnf-node"/>
+    <rect x="366" y="86" width="76" height="32" rx="3" class="tnf-node"/>
     <text x="404" y="102" class="tnf-code">[0?]1?</text>
     <text x="404" y="133" class="tnf-sub">…</text>
   </g>
   <g>
-    <rect x="468" y="86" width="76" height="32" rx="6" class="tnf-node"/>
+    <rect x="468" y="86" width="76" height="32" rx="3" class="tnf-node"/>
     <text x="506" y="102" class="tnf-code">[1?]0?</text>
   </g>
 
   <!-- Level 2 under <2? -->
   <g>
-    <rect x="8" y="186" width="68" height="32" rx="6" class="tnf-node"/>
+    <rect x="8" y="186" width="68" height="32" rx="3" class="tnf-node"/>
     <text x="42" y="202" class="tnf-code">&lt;&lt;1?</text>
   </g>
   <g>
-    <rect x="88" y="186" width="68" height="32" rx="6" class="tnf-pruned"/>
+    <rect x="88" y="186" width="68" height="32" rx="3" class="tnf-pruned"/>
     <text x="122" y="202" class="tnf-code-fade">&lt;&gt;1?</text>
-    <text x="122" y="234" class="tnf-sub">cancel</text>
+    <text x="122" y="234" class="tnf-sub">CANCEL</text>
   </g>
   <g>
-    <rect x="168" y="186" width="68" height="32" rx="6" class="tnf-node"/>
+    <rect x="168" y="186" width="68" height="32" rx="3" class="tnf-node"/>
     <text x="202" y="202" class="tnf-code">&lt;*1?</text>
   </g>
   <g>
-    <rect x="248" y="186" width="92" height="32" rx="6" class="tnf-node"/>
+    <rect x="248" y="186" width="92" height="32" rx="3" class="tnf-node"/>
     <text x="294" y="202" class="tnf-code">&lt;[0?]0?</text>
   </g>
 
   <!-- Level 2 under [1?]0? -->
   <g>
-    <rect x="472" y="186" width="68" height="32" rx="6" class="tnf-halt"/>
+    <rect x="472" y="186" width="68" height="32" rx="3" class="tnf-halt" filter="url(#glow)"/>
     <text x="506" y="202" class="tnf-code">[1?]</text>
-    <text x="506" y="234" class="tnf-sub-halt">halts in 1</text>
+    <text x="506" y="234" class="tnf-sub-halt" filter="url(#glow)">HALTS IN 1</text>
   </g>
 </svg>

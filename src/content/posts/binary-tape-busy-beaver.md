@@ -1,6 +1,6 @@
 ---
 title: Busy Beaver for a binary tape machine
-description: How to compute and formally verify the Busy Beaver function for a binary tape machine with loops up to length 14 in Lean 4 — without a single hand-written holdout proof.
+description: Computing and formally verifying the Busy Beaver function for a binary tape machine with loops in Lean 4.
 date: 2026-11-19
 tags: [Lean, computability, formal-verification]
 cover: attachments/infernal-council.jpg
@@ -23,17 +23,17 @@ In 2024, the bbchallenge community settled the five-state Turing machine case �
 
 The machine operates on a bi-infinite tape of bits, all initially `0`, with a read/write head. A program is a string over five characters — three primitive commands and a loop:
 
-| Command | Effect |
-| ------- | ------ |
-| `<`     | move the head one cell left |
-| `>`     | move the head one cell right |
-| `*`     | flip the bit under the head |
+| Command | Effect                                                      |
+| ------- | ----------------------------------------------------------- |
+| `<`     | move the head one cell left                                 |
+| `>`     | move the head one cell right                                |
+| `*`     | flip the bit under the head                                 |
 | `[b]`   | if the current bit is `1`, run `b` and repeat; if `0`, skip |
 
 ![Animated execution of a six-character program on a bi-infinite binary tape](./attachments/bf-tape.svg)
 *Running `*<*[>]` (the 6-character champion) from a blank tape: eight steps from start to halt.*
 
-It can be proved that this machine is [Turing-complete](https://en.wikipedia.org/wiki/Turing_completeness) — capable of any computation — so its Busy Beaver function is just as uncomputable as the classical one. Running a program charges one step for each `<`, `>`, `*`, and `[` check.[^2]
+This machine [is Turing-complete](https://esolangs.org/wiki/Boolfuck#Computational_class) — capable of any computation — so its Busy Beaver function is just as uncomputable as the classical one. Running a program charges one step for each `<`, `>`, `*`, and `[` check.[^2]
 
 ## Formalisation
 
@@ -53,7 +53,7 @@ inductive Program where
   | gap   (size : Nat) (pos : 0 < size) (rest : Program)
 ```
 
-Each constructor corresponds to one command, `nil` (written `ε`) is the empty program, and `gap` is a placeholder for an unfinished piece of a fixed, positive size.[^4] Later we will write `‖p‖` for the length of `p` in characters, and `p°` to mean that `p` contains no gaps.
+Each constructor corresponds to one command, `nil` (written `ε`) is the empty program, and `gap` (written `ωn`) is a placeholder for an unfinished piece of a fixed, positive size $n$.[^4] Later we will write `‖p‖` for the length of `p` in characters, and `p°` to mean that `p` contains no gaps.
 
 ![Program AST for the six-character program](./attachments/bf-ast.svg)
 *The program `*[<*]>` as a `Program` tree. Each `loop` branches into its `body` (inside the brackets) and its `rest` (after them).*
@@ -110,7 +110,7 @@ def Halts    (m : Machine T) : Prop           := ∃ k, HaltsIn m k
 def Diverges (m : Machine T) : Prop           := ∀ k, (m ⇒ k).isSome
 ```
 
-A machine halts in `k` steps when its program reaches `ε` after exactly `k` steps, and diverges when it can still take a step after any number of steps `k`. We denote these as `m ⇓ k`, `m⇓`, and `m⇑`, and use the same notation `p ⇓ k`, `p⇓`, and `p⇑` for a program `p` run from a blank tape on any tape satisfying the `Tape` axioms. Later we will write `p ~ q` when two programs share the same halting behaviour (`∀ k, p ⇓ k ↔ q ⇓ k`).
+A machine halts in `k` steps when its program reaches `ε` after exactly `k` steps, and diverges when it can still take a step after any number of steps `k`. We denote these as `m ⇓ k`, `m⇓`, and `m⇑`, and use the same notation `p ⇓ k`, `p⇓`, and `p⇑` for a program `p` run from a blank tape. Later we will write `p ~ q` when two programs share the same halting behaviour (`∀ k, p ⇓ k ↔ q ⇓ k`).
 
 ### The Busy Beaver statement
 
@@ -126,9 +126,9 @@ Here `IsBB n v` states that $\mathrm{BB}(n) = v$: no program of length `n` halts
 
 ## Tree Normal Form
 
-There are $|\mathcal{L}(14)| = 304{,}036{,}170$ programs of length 14, and their number more than quadruples with each extra character. Reasoning about each program individually is neither feasible, nor elegant, nor even necessary. For example, every program of the form `[12?]` behaves identically: on a blank tape the current bit is `0`, so the loop body is never entered and all 14,878,455 programs halt in a single step.
+There are $|\mathcal{L}(14)| = 304{,}036{,}170$ programs of length 14, and their number more than quadruples with each extra character. Reasoning about each program individually is neither feasible, nor elegant, nor even necessary. For example, every program of the form `[ω12]` behaves identically: on a blank tape the current bit is `0`, so the loop body is never entered and all 14,878,455 programs halt in a single step.
 
-We therefore expand a gap only when its contents actually affect execution; whenever we prove something about a program with gaps, the same proof holds for every program that fits it. This strategy is known as *Tree Normal Form* (TNF): start from a single gap `n?`, reason about it, and branch only when we hit a gap.
+We therefore expand a gap only when its contents actually affect execution; whenever we prove something about a program with gaps, the same proof holds for every program that fits it. This strategy is known as *Tree Normal Form* (TNF): start from a single gap `ωn`, reason about it, and branch only when we hit a gap.
 
 ### Refinement
 
@@ -158,7 +158,7 @@ In other words, halting and divergence propagate from a general program to every
 
 ### Expanding a gap
 
-When we cannot settle a partial program `q` as a whole, we split the family it represents into smaller subsets and reason about each of them separately. An `Expander` pairs such a splitting function with a proof that no halting time is lost[^10] and that expansion terminates:[^11]
+When we cannot settle a partial program `q` as a whole, we split the family it represents into smaller subsets and reason about each of them separately. An `Expander` pairs such a splitting function with proofs that no halting time is lost,[^10] that expansion terminates,[^11] and that it only fills gaps, keeping the length:
 
 ```lean
 structure Expander where
@@ -166,13 +166,15 @@ structure Expander where
   cover      : ∀ {p q : Program} (i : Fin q.numGaps),
     p° → p ⊑ q → ∃ c ∈ expand q i, ∃ p', p'° ∧ p' ⊑ c ∧ p ~ p'
   decreasing : ∀ {q c : Program} {i : Fin q.numGaps},
-    c ∈ expand q i → c.gapSum < q.gapSum
+    c ∈ expand q i → ‖c‖° < ‖q‖°
+  size       : ∀ {q c : Program} {i : Fin q.numGaps},
+    c ∈ expand q i → ‖c‖ = ‖q‖
 ```
 
-The simplest way to expand a gap of size `k` is to branch on its first command: `<(k-1)?`, `>(k-1)?`, `*(k-1)?`, or a loop `[a?]b?` with $a + b = k - 2$.[^12]
+The simplest way to expand a gap is to branch on its first command: a move, a flip, or a loop.[^12]
 
 ![Expanding a gap of size 4 one command at a time](./attachments/bf-expand.svg)
-*Expanding `4?` one command at a time. `[2?]` halts in a single step, whatever its body.*
+*Expanding `ω4` one command at a time. `[ω2]` halts in a single step, whatever its body.*
 
 ## Deciders
 
@@ -186,34 +188,97 @@ inductive Verdict (q : Program) where
   | unknown
 ```
 
-TODO: по фразе на вердикт. `halts t h` и `diverges h` — программа решена целиком (вместе со всеми заполнениями пробелов), и вердикт сам несёт доказательство. `stuck i` — исполнение упёрлось в пробел номер `i`: вот его и раскрываем. `unknown` — decider сдался.
+`halts t h` and `diverges h` carry proofs that the program halts after exactly `t` steps or never halts, whatever fills its gaps. `stuck i` means that reasoning about the program cannot go on until gap `i` is expanded. `unknown` is an honest admission that the decider found neither a proof nor a gap to blame.
+
+A decider is just a function that takes a program and returns its verdict:
 
 ```lean
 def Decider := (q : Program) → Verdict q
 ```
 
-TODO: главная мысль — decider это просто функция, доказательства едут внутри вердиктов: неправильный вердикт нельзя даже сконструировать. `stuck` и `unknown` ничего не обещают, поэтому доказательств в них нет. Связка: decider говорит *где* раскрывать, expander — *как*.
+For example, a decider may simply run the program for a few hundred steps and see whether it halts, look for a configuration that repeats itself, possibly shifted along the tape, or recognise patterns on the tape that keep growing in a predictable way. Each of them settles some programs and gives up on the rest.
 
-TODO: deciders комбинируются через `<|>` — следующий спрашивается, только если предыдущий ответил `unknown`. Пример цепочки для BB(12–14):
+Since different deciders settle different programs, we need to combine their conclusions about the same program. `Verdict q` forms a [monoid](https://en.wikipedia.org/wiki/Monoid) with `unknown` as the identity: concatenation keeps the first verdict that is not `unknown`.
+
+Functions into a monoid form a monoid pointwise, so deciders inherit it, and concatenation chains them into a single decider.[^13]
+
+## Search
+
+An expander and a decider are all the search needs. It asks the decider about a partial program and, whenever the decider gets stuck on a gap, expands that gap and recurses into the children:[^14]
 
 ```lean
-def fullChain : Decider :=
-  Decider.simulator Zipper 300 <|> .translatedUpTo 50 24 <|> .windows 1 200 <|>
-    .translated 300 24 <|> .translatedUpTo 500 50 <|> .windows 2 200 <|> .blocksUpTo 2000 <|>
-    .translated 2000 132 <|> .translated 2000 144
+def search (e : Expander) (d : Decider) (q : Program) : Outcome :=
+  match d q with
+  | .halts t _  => ⟨[], some (t, q)⟩
+  | .diverges _ => ∅
+  | .stuck i    =>
+    .concat ((e.expand q i).attach.map fun c => search e d c.1)
+  | .unknown    => ⟨[q], none⟩
+termination_by ‖q‖°
+decreasing_by exact e.decreasing c.2
 ```
 
-TODO: одна фраза — сначала дешёвые, потом дорогие; сами deciders разбираются ниже. (Тонкость: `stuck` от первого decider тоже не перебивается — дальше по цепочке не идём, сразу раскрываем. Можно в сноску.)
+It always terminates, since every recursive call has a strictly smaller `‖q‖°`. The result is an `Outcome`: the *holdouts*, programs the decider could not settle, and the longest halt found together with the program that achieves it:
+
+```lean
+structure Outcome where
+  holdouts : List Program
+  longest  : Option (Nat × Program)
+```
+
+Outcomes of the children form yet another monoid: holdouts are concatenated, and the longer halt is kept.
+
+If a search from `ωn` leaves no holdouts, its longest halt is exactly $\mathrm{BB}(n)$:
+
+```lean
+theorem IsBB.of_search (e : Expander) (d : Decider) {n B : Nat} :
+    (search e d (ω n)).value? = some B → IsBB n B
+```
+
+Every program of length `n` refines `ωn`, so it either runs forever or halts within `B` steps. And the program that achieves `B` is a partial program of length `n` that halts in `B` steps, so filling its gaps with anything gives a gap-free one that does too.
+
+With `fullChain` concatenating nine deciders, the whole proof that $\mathrm{BB}(14) = 158$ fits in a line:
+
+```lean
+theorem bb14 : IsBB 14 158 :=
+  IsBB.of_search .tnf fullChain (by native_decide)
+```
+
+## Conclusion
+
+Any other value up to length 14 is proved the same way. Here they all are, together with the number of programs of each length and one of its champions:[^15]
+
+| $n$ |    Programs | $\mathrm{BB}(n)$ | Champion          |
+| --- | ----------: | ---------------: | ----------------- |
+| 1   |           3 |                1 | `<`               |
+| 2   |          10 |                2 | `<<`              |
+| 3   |          36 |                3 | `<<<`             |
+| 4   |         137 |                4 | `<<<<`            |
+| 5   |         543 |                5 | `<<<<<`           |
+| 6   |       2,219 |                8 | `*<*[>]`          |
+| 7   |       9,285 |               10 | `*<*[*>]`         |
+| 8   |      39,587 |               14 | `*[<*<*>]`        |
+| 9   |     171,369 |               18 | `*[[<]>>*]`       |
+| 10  |     751,236 |               30 | `*[<*[>]<<]`      |
+| 11  |   3,328,218 |               35 | `*[<*[>]*<<]`     |
+| 12  |  14,878,455 |               72 | `*[<*[>>*>]<]`    |
+| 13  |  67,030,785 |              120 | `*[<*<*[>*>]<]`   |
+| 14  | 304,036,170 |              158 | `*[<<*[>>>*>]<]`  |
+
+All of these values come from the same search: the effort goes into a few general deciders, each proved sound once, rather than into individual programs.
 
 [^1]: Non-halting machines are not counted — otherwise the answer would trivially be infinite. Separating them from machines that merely run for a very long time is what makes the function [uncomputable](https://en.wikipedia.org/wiki/Halting_problem).
 [^2]: Both `[` and `]` can be thought of as a single operation — a conditional jump — so their cost is always 1 step regardless of the outcome.
 [^3]: An inductive type avoids scanning for matching brackets at runtime and guarantees that every program is syntactically valid by construction.
-[^4]: We will write a gap of size $m$ as `m?` — a wildcard standing for any valid program of length $m$. Later, gaps let us reason about whole classes of programs at once rather than enumerating them one by one.
+[^4]: In Lean, `ω n` — a wildcard standing for any valid program of length $n$. Later, gaps let us reason about whole classes of programs at once rather than enumerating them one by one.
 [^5]: Separating the interface from the implementation lets us define the machine once and pick whichever tape fits the task — a plain function `Int → Bool` for clean algebraic proofs and the final specification, or a fast list zipper for running simulations and deciders.
 [^6]: Hitting `.gap` also returns `none`: the next command is unknown, so execution cannot continue — though unlike `ε`, it does not count as halting.
 [^7]: `Option.bind` composes steps [monadically](https://en.wikipedia.org/wiki/Monad_(functional_programming)): if any intermediate step returns `none`, the rest of the chain short-circuits to `none`.
 [^8]: Possibly none — refinement is reflexive, so every program refines itself (`p ⊑ p`).
-[^9]: The replacement programs may themselves contain gaps — for instance, `*[2?] ⊑ 1?[2?]`.
+[^9]: The replacement programs may themselves contain gaps — for instance, `*[ω2] ⊑ ω1[ω2]`.
 [^10]: Allowing `p ~ p'` instead of `p = p'` lets the expander drop entire branches, as long as every dropped program has an equivalent twin among the remaining children. For example, swapping every `<` with `>` gives an equivalent program, since the blank tape is symmetric, so it can keep only programs whose first move is `<`.
-[^11]: `decreasing` guarantees that expansion cannot go on forever: every child is strictly less unknown than its parent, measured by `gapSum` — the total size of its gaps.
+[^11]: `decreasing` guarantees that expansion cannot go on forever: every child is strictly less unknown than its parent, measured by `‖c‖°`, the total size of its gaps (so `c°` means `‖c‖° = 0`).
 [^12]: The expander actually used in the code is considerably more involved — for instance, it skips mirrored programs.
+[^13]: `stuck` ends the chain as well: a program whose execution reaches a gap neither halts nor runs forever, so no other decider could settle it.
+[^14]: `attach` pairs each child with a proof that it came from `expand`, so that `decreasing_by` can use `decreasing` on it.
+[^15]: Champions are not unique: for example, for $n \le 5$, any program without loops takes exactly $n$ steps, and mirroring a champion always gives another one.
