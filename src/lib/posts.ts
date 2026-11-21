@@ -4,36 +4,12 @@ import { slug as githubSlug } from 'github-slugger';
 export type Post = CollectionEntry<'posts'>;
 
 export const postUrl = (id: string) => `/blog/${id}/`;
-export const tagSlug = (tag: string) => githubSlug(tag);
-export const tagUrl = (tag: string) => `/tag/${tagSlug(tag)}/`;
 
 /** All published posts, newest first. */
 export async function getPosts() {
   const all = await getCollection('posts', (p) => !p.data.draft);
   return all.sort((a, b) => +b.data.date - +a.data.date);
 }
-
-export interface TagInfo {
-  slug: string;
-  name: string;
-  count: number;
-}
-
-/** Every tag in use, most used first. ML and ml count as one tag. */
-export function allTags(posts: Post[]): TagInfo[] {
-  const bySlug = new Map<string, TagInfo>();
-  for (const post of posts) {
-    for (const name of post.data.tags) {
-      const slug = tagSlug(name);
-      const info = bySlug.get(slug) ?? { slug, name, count: 0 };
-      info.count++;
-      bySlug.set(slug, info);
-    }
-  }
-  return [...bySlug.values()].sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, 'ru'));
-}
-
-export const hasTag = (post: Post, slug: string) => post.data.tags.some((t) => tagSlug(t) === slug);
 
 const longDate = new Intl.DateTimeFormat('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
 const shortDate = new Intl.DateTimeFormat('en-US', { day: 'numeric', month: 'short' });

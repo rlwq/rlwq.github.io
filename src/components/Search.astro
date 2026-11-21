@@ -1,15 +1,13 @@
 <dialog
-  class="mx-auto mt-[12vh] max-h-[min(560px,76vh)] w-[min(620px,calc(100vw-32px))] overflow-hidden rounded-md border bg-background p-0 text-foreground shadow-2xl backdrop:bg-black/45 backdrop:backdrop-blur-[2px] open:flex open:flex-col"
+  class="mx-auto mt-[12vh] max-h-[min(560px,76vh)] w-[min(620px,calc(100vw-32px))] overflow-hidden rounded-[5px] border bg-muted p-0 text-foreground shadow-2xl backdrop:bg-black/60 open:flex open:flex-col"
   data-search
   aria-label="Search articles"
 >
-  <div class="flex items-center gap-3 border-b px-[18px]">
-    <svg class="size-[18px] shrink-0 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-      <circle cx="11" cy="11" r="7"></circle>
-      <path d="m20 20-3.5-3.5"></path>
-    </svg>
+  <!-- bezel: the instrument strip above the screen, like .code-bar on code blocks -->
+  <div class="search-bar flex items-center gap-3 pr-2 pl-[18px]" data-search-bar>
+    <span class="search-dot size-1 shrink-0 bg-primary shadow-[0_0_4px_rgb(240_160_75/0.65)]" aria-hidden="true"></span>
     <input
-      class="h-14 min-w-0 flex-1 bg-transparent text-xl outline-none placeholder:text-muted-foreground/70"
+      class="h-12 min-w-0 flex-1 bg-transparent font-mono text-[15px] outline-none placeholder:text-muted-foreground/70 [&::-webkit-search-cancel-button]:hidden"
       type="search"
       placeholder="Search articles…"
       autocomplete="off"
@@ -18,10 +16,13 @@
       aria-controls="search-results"
       data-search-input
     />
-    <kbd>Esc</kbd>
+    <button type="button" class="lightbox-btn lightbox-close" data-search-close>Close <kbd>Esc</kbd></button>
   </div>
-  <ul class="overflow-y-auto p-1.5" id="search-results" role="listbox" data-search-results></ul>
-  <p class="p-[18px] font-sans text-[13px] text-muted-foreground" data-search-empty>
-    Start typing — search covers titles, tags and article text.
-  </p>
+  <!-- screen: the results -->
+  <div class="search-screen flex min-h-0 flex-1 flex-col" data-search-screen>
+    <ul class="overflow-y-auto p-1.5" id="search-results" role="listbox" data-search-results></ul>
+    <div class="p-[18px] font-mono text-[12px] tracking-[0.02em] text-muted-foreground" data-search-empty>
+      <p>Type to search titles, tags and article text.</p>
+    </div>
+  </div>
 </dialog>

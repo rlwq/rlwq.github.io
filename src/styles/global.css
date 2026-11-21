@@ -7,8 +7,38 @@
    Palette "graphite and amber". Utilities: bg-background, text-foreground,
    text-primary, bg-muted, text-muted-foreground, border-border, ...
 --------------------------------------------------------------------------- */
-:root {
+/* Dark is the default; the light palette below applies only with data-theme="light"
+   (hidden for now: see lightTheme in site.config.ts). */
+:root,
+[data-theme='dark'] {
   --radius: 0.375rem;
+  --background: #121212;
+  --foreground: #e7e5e2;
+  --card: #171716;
+  --card-foreground: #e7e5e2;
+  --popover: #1a1a19;
+  --popover-foreground: #e7e5e2;
+  --primary: #f0a04b;
+  --primary-foreground: #121212;
+  --secondary: #1a1a19;
+  --secondary-foreground: #e7e5e2;
+  --muted: #1a1a19;
+  --muted-foreground: #a19e98;
+  --accent: #212120;
+  --accent-foreground: #e7e5e2;
+  --destructive: #ef7d72;
+  --border: #292826;
+  --input: #292826;
+  --ring: #f0a04b;
+  /* callouts and code */
+  --note: #7aa7e8;
+  --tip: #8fc07a;
+  --warning: #e3c454;
+  --danger: #ef7d72;
+  color-scheme: dark;
+}
+
+[data-theme='light'] {
   --background: #fafaf9;
   --foreground: #1c1b1a;
   --card: #fafaf9;
@@ -33,32 +63,6 @@
   --warning: #8f7400;
   --danger: #b3261e;
   color-scheme: light;
-}
-
-[data-theme='dark'] {
-  --background: #121212;
-  --foreground: #e7e5e2;
-  --card: #171716;
-  --card-foreground: #e7e5e2;
-  --popover: #1a1a19;
-  --popover-foreground: #e7e5e2;
-  --primary: #f0a04b;
-  --primary-foreground: #121212;
-  --secondary: #1a1a19;
-  --secondary-foreground: #e7e5e2;
-  --muted: #1a1a19;
-  --muted-foreground: #a19e98;
-  --accent: #212120;
-  --accent-foreground: #e7e5e2;
-  --destructive: #ef7d72;
-  --border: #292826;
-  --input: #292826;
-  --ring: #f0a04b;
-  --note: #7aa7e8;
-  --tip: #8fc07a;
-  --warning: #e3c454;
-  --danger: #ef7d72;
-  color-scheme: dark;
 }
 
 @theme inline {
@@ -126,7 +130,13 @@
     background: color-mix(in srgb, var(--primary) 28%, transparent);
   }
 
+  /* The focus ring shows only while moving through the page with Tab ([data-tabbing],
+     set in Base.astro), never on its own: not on a button a dialog focuses when it opens,
+     not after a click or a shortcut such as ⌘K or Esc. */
   :focus-visible {
+    outline: none;
+  }
+  [data-tabbing] :focus-visible {
     outline: 2px solid var(--ring);
     outline-offset: 2px;
   }
@@ -341,7 +351,8 @@ dialog.lightbox[open]::backdrop {
     0 0 22px rgb(var(--lamp-aura, 240 160 75) / calc(0.12 * var(--lamp-aura-a, 1)));
 }
 
-.lightbox-close kbd {
+.lightbox-close kbd,
+.search-keys kbd {
   border: 0;
   padding: 0;
   font-family: var(--font-mono);
@@ -350,12 +361,14 @@ dialog.lightbox[open]::backdrop {
   color: color-mix(in srgb, var(--muted-foreground) 75%, transparent);
 }
 
-.lightbox-close kbd::before {
+.lightbox-close kbd::before,
+.search-keys kbd::before {
   content: '[';
   opacity: 0.55;
 }
 
-.lightbox-close kbd::after {
+.lightbox-close kbd::after,
+.search-keys kbd::after {
   content: ']';
   opacity: 0.55;
 }

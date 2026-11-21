@@ -1,7 +1,10 @@
 // Search dialog: ⌘K / Ctrl+K or "/" opens it. The index is a small JSON file
 // built with the site (/search.json), loaded the first time search opens.
 
-type Doc = { t: string; u: string; g: string; x: string };
+// t title, u url, g tags (space-separated), d date (YYYY-MM-DD), m minutes to read, x text
+type Doc = { t: string; u: string; g: string; d: string; m: number; x: string };
+
+const loadDocs = () => fetch('/search.json').then((r) => r.json() as Promise<Doc[]>);
 
 const dialog = document.querySelector<HTMLDialogElement>('[data-search]');
 if (dialog) initSearch(dialog);
@@ -28,21 +31,46 @@ function initSearch(dialog: HTMLDialogElement) {
   function snippet(text: string, word: string) {
     const i = norm(text).indexOf(word);
     if (i < 0) return text.slice(0, 140) + (text.length > 140 ? '…' : '');
-    const start = Math.max(0, i - 50);
+    let start = Math.max(0, i - 50);
+    // start on a word boundary, not halfway through a word
+    if (start > 0) {
+      const space = text.indexOf(' ', start);
+      if (space >= 0 && space < i) start = space + 1;
+    }
     return (start > 0 ? '…' : '') + text.slice(start, start + 150) + (start + 150 < text.length ? '…' : '');
   }
 
+  // empty query: a hint, every tag as a button (click fills in #tag) and the keys
+  function idle(all: Doc[]) {
+    results.innerHTML = '';
+    empty.hidden = false;
+    const count = new Map<string, { name: string; n: number }>();
+    for (const d of all)
+      for (const name of d.g.split(/\s+/).filter(Boolean)) {
+        const t = count.get(norm(name)) ?? { name, n: 0 };
+        t.n++;
+        count.set(norm(name), t);
+      }
+    const tags = [...count.values()].sort((a, b) => b.n - a.n || a.name.localeCompare(b.name));
+    empty.innerHTML =
+      `<p>Type to search titles, tags and article text.</p>` +
+      (tags.length
+        ? `<p class="mt-4 flex flex-wrap items-center gap-x-3.5 gap-y-1.5 text-[10.5px] leading-4 tracking-[0.06em] uppercase">${tags
+            .map((t) => `<button type="button" class="search-tag cursor-pointer uppercase" data-tag="${escape(t.name)}">${escape(t.name)}</button>`)
+            .join('')}</p>`
+        : '') +
+      `<p class="search-keys mt-4 text-[10.5px] leading-4 tracking-[0.06em] uppercase max-sm:hidden"><kbd>↑↓</kbd> select<span class="mx-2 opacity-50">·</span><kbd>↵</kbd> open<span class="mx-2 opacity-50">·</span><kbd>Esc</kbd> close</p>`;
+  }
+
+  let runs = 0;
   async function run() {
     const q = norm(input.value.trim());
     const words = q.split(/\s+/).filter(Boolean);
-    if (!words.length) {
-      results.innerHTML = '';
-      empty.hidden = false;
-      empty.textContent = 'Start typing — search covers titles, tags and article text.';
-      return;
-    }
-    docs ??= fetch('/search.json').then((r) => r.json());
+    docs ??= loadDocs();
+    const turn = ++runs;
     const all = await docs;
+    if (turn !== runs) return; // a newer keystroke already ran
+    if (!words.length) return idle(all);
     const textWords = words.filter((w) => !w.startsWith('#'));
     const scored = all
       .map((d) => {
@@ -77,11 +105,20 @@ function initSearch(dialog: HTMLDialogElement) {
     const hl = textWords.length ? textWords : [];
     const snipWord = textWords[0] ?? '';
     results.innerHTML = scored
-      .map(
-        ({ d }, i) =>
-          `<li><a class="block rounded-sm px-3 py-2.5 aria-selected:bg-muted" href="${d.u}" role="option" aria-selected="${i === 0}"><strong class="block font-medium">${highlight(d.t, hl)}</strong><span class="block text-sm leading-[21px] text-muted-foreground">${highlight(snipWord ? snippet(d.x, snipWord) : d.x.slice(0, 140) + (d.x.length > 140 ? '…' : ''), hl)}</span></a></li>`,
-      )
+      .map(({ d }, i) => {
+        const text = snipWord ? snippet(d.x, snipWord) : d.x.slice(0, 140) + (d.x.length > 140 ? '…' : '');
+        const tags = d.g.split(/\s+/).filter(Boolean).map((t) => `<span class="search-tag">${escape(t)}</span>`).join('');
+        return `<li><a class="grid grid-cols-[24px_1fr] gap-x-2 rounded-[3px] px-3 py-3" href="${d.u}" role="option" aria-selected="${i === 0}">
+          <span class="search-n pt-px font-mono text-[12px] leading-5" aria-hidden="true">${String(i + 1).padStart(2, '0')}</span>
+          <span class="min-w-0">
+            <strong class="block font-mono text-[13.5px] leading-5 font-medium">${highlight(d.t, hl)}</strong>
+            <span class="search-meta mt-1 flex flex-wrap items-center gap-x-3.5 gap-y-1 font-mono text-[10.5px] leading-4 tracking-[0.06em] text-muted-foreground uppercase"><span>${escape(d.d)}<span class="mx-2 opacity-50">·</span>${d.m} min read</span>${tags}</span>
+            <span class="search-snip mt-1.5 line-clamp-2 font-mono text-[12px] leading-[19px] text-muted-foreground">${highlight(text, hl)}</span>
+          </span>
+        </a></li>`;
+      })
       .join('');
+    document.dispatchEvent(new Event('lamp:search-lines'));
   }
 
   function move(delta: number) {
@@ -94,7 +131,8 @@ function initSearch(dialog: HTMLDialogElement) {
 
   function show(initialQuery?: string) {
     if (!dialog.open) dialog.showModal();
-    docs ??= fetch('/search.json').then((r) => r.json());
+    document.dispatchEvent(new Event('lamp:search-lines'));
+    docs ??= loadDocs();
     if (initialQuery !== undefined) {
       input.value = initialQuery;
       input.focus();
@@ -102,6 +140,7 @@ function initSearch(dialog: HTMLDialogElement) {
       input.dispatchEvent(new Event('input'));
     } else {
       input.select();
+      void run();
     }
   }
 
@@ -126,13 +165,12 @@ function initSearch(dialog: HTMLDialogElement) {
   dialog.addEventListener('click', (e) => {
     if (e.target === dialog) dialog.close();
   });
+  dialog.querySelector('[data-search-close]')?.addEventListener('click', () => dialog.close());
 
   document.querySelectorAll('[data-search-open]').forEach((b) => b.addEventListener('click', () => show()));
+  // tags (in article headers and on cards) open the search filtered to that tag
   document.addEventListener('click', (e) => {
-    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
-    const link = (e.target as Element).closest<HTMLAnchorElement>('a[href^="/tag/"]');
-    if (!link) return;
-    const tag = link.textContent?.trim().replace(/^#/, '');
+    const tag = (e.target as Element).closest<HTMLElement>('[data-tag]')?.dataset.tag?.trim();
     if (!tag) return;
     e.preventDefault();
     show(`#${tag}`);

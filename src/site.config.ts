@@ -6,7 +6,9 @@ export const site = {
   author: 'Carnavschi Serghei',
   lang: 'en',
   nav: [] as { href: string; label: string }[],
-  /** How many articles the home page lists. */
-  homeCount: 10,
+  /** The light theme is fully styled (palette, [data-theme='light'] rules in the CSS, the
+   *  phosphor-light code theme) but hidden: the site is always dark. true brings back the
+   *  Theme switch in the header, the OS preference and the saved choice. */
+  lightTheme: false,
 };
 

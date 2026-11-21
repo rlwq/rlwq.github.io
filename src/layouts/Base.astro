@@ -30,7 +30,7 @@ const navItem =
 ---
 
 <!doctype html>
-<html lang={site.lang} class={lamp}>
+<html lang={site.lang} class={lamp} data-theme={site.lightTheme ? undefined : 'dark'}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -53,18 +53,28 @@ const navItem =
     <meta name="twitter:title" content={title ?? site.title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogUrl} />
-    <meta name="theme-color" content="#fafaf9" />
-    <script is:inline>
+    <meta name="theme-color" content={site.lightTheme ? '#fafaf9' : '#121212'} />
+    <script is:inline define:vars={{ lightTheme: site.lightTheme }}>
       // Theme before first paint, so the page never flashes the wrong colors.
+      // With the light theme hidden (site.config.ts) it is always dark.
       (() => {
         let saved = null;
         try {
           saved = localStorage.getItem('theme');
         } catch {}
-        const dark = saved ? saved === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+        const dark = !lightTheme || (saved ? saved === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches);
         document.documentElement.dataset.theme = dark ? 'dark' : 'light';
         const meta = document.querySelector('meta[name="theme-color"]');
         if (meta) meta.setAttribute('content', dark ? '#121212' : '#fafaf9');
+      })();
+    </script>
+    <script is:inline>
+      // Focus rings only while navigating with Tab: Tab turns them on, a click or a tap
+      // turns them off (see :focus-visible in global.css).
+      (() => {
+        const root = document.documentElement;
+        addEventListener('keydown', (e) => e.key === 'Tab' && root.setAttribute('data-tabbing', ''), true);
+        addEventListener('pointerdown', () => root.removeAttribute('data-tabbing'), true);
       })();
     </script>
   </head>
@@ -84,7 +94,7 @@ const navItem =
         <button type="button" class={navItem} data-search-open>
           Search <kbd class="max-sm:hidden">⌘K</kbd>
         </button>
-        <button type="button" class={navItem} data-theme-toggle aria-label="Switch theme">Theme</button>
+        {site.lightTheme && <button type="button" class={navItem} data-theme-toggle aria-label="Switch theme">Theme</button>}
       </div>
     </header>
 

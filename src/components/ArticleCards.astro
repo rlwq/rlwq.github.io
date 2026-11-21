@@ -1,7 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import { render } from 'astro:content';
-import { postUrl, readingMinutes, tagUrl, type Post } from '../lib/posts';
+import { postUrl, readingMinutes, type Post } from '../lib/posts';
 
 interface Props {
   posts: Post[];
@@ -80,7 +80,7 @@ const first = (list: { depth: number }[], i: number) =>
                 <h2
                   class:list={[
                     'text-[21px] leading-[1.2] font-medium tracking-[-0.015em] text-balance transition-colors sm:text-[23px]',
-                    hasCover ? 'text-[#fafaf9] group-hover:text-[#f0a04b]' : 'text-foreground group-hover:text-primary',
+                    hasCover ? 'text-[#fafaf9]' : 'text-foreground',
                   ]}
                 >
                   {post.data.title}
@@ -100,15 +100,16 @@ const first = (list: { depth: number }[], i: number) =>
                 {post.data.tags.length > 0 && (
                   <div class="mt-2.5 flex flex-wrap gap-x-3.5 gap-y-1">
                     {post.data.tags.map((t) => (
-                      <a
-                        href={tagUrl(t)}
+                      <button
+                        type="button"
+                        data-tag={t}
                         class:list={[
-                          'card-tag pointer-events-auto inline-flex items-center gap-1.5 font-mono text-[11px] leading-4 tracking-[0.06em] uppercase transition-colors',
+                          'card-tag pointer-events-auto inline-flex cursor-pointer items-center gap-1.5 font-mono text-[11px] leading-4 tracking-[0.06em] uppercase transition-colors',
                           hasCover ? 'text-[#f0a04b]' : 'text-primary',
                         ]}
                       >
                         {t}
-                      </a>
+                      </button>
                     ))}
                   </div>
                 )}

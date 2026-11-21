@@ -102,12 +102,26 @@ function lineSpecs(): LineSpec[] {
   return specs;
 }
 
-function paintLines() {
+/** Search dialog lines; its results are rendered on the fly, so search.ts asks for a
+ *  repaint (lamp:search-lines) after each render and when the dialog opens. */
+function searchLineSpecs(): LineSpec[] {
+  const specs: LineSpec[] = [];
+  const bar = document.querySelector<HTMLElement>('[data-search-bar]');
+  // the bezel's lower edge, as under .code-bar on code blocks
+  if (bar) specs.push({ el: bar, side: 'bottom', thick: 2, cell: 1, flip: true, color: () => cssVar('--border'), peak: 0.9 });
+  // between hits, as between table rows
+  document.querySelectorAll<HTMLElement>('[data-search-results] li + li').forEach((el) =>
+    specs.push({ el, side: 'top', thick: 1, cell: 1, color: () => cssVar('--border'), peak: 0.72 }),
+  );
+  return specs;
+}
+
+function paintLines(specs: LineSpec[] = [...lineSpecs(), ...searchLineSpecs()]) {
   if (!has('ui')) return;
-  for (const { el, side, thick, color, peak, cell = CELL, flip = false } of lineSpecs()) {
+  for (const { el, side, thick, color, peak, cell = CELL, flip = false } of specs) {
     const vertical = side === 'left' || side === 'right';
-    const r = el.getBoundingClientRect();
-    const len = vertical ? r.height : r.width;
+    // layout size, not the on-screen box: a dialog mid-way through its open animation is scaled
+    const len = vertical ? el.offsetHeight : el.offsetWidth;
     if (len < 4) continue;
     const url = strip(len, thick, vertical, color(), fadeEnds, peak, cell, flip);
     // keep any existing background colour (the header has one); the line is an extra image layer
@@ -344,7 +358,99 @@ function setupCoverHover() {
    toc: a vertical tape of cells along the side TOC that fills as you read,
    data-read on the sections you have already passed, and the current section
    kept in view in a long TOC.
+
+   Two looks, picked by TOC_RAIL:
+   - 'even':  the plain tape, 3px cells every 5px, filling at a steady pace from
+              "first heading reaches the reading line" to the bottom of the page.
+              Its tip does not track the highlighted entry.
+   - 'scale': the rail is cut into sections, one per TOC entry (top of entry i to
+              top of entry i+1). Section i starts filling exactly when toc.ts
+              highlights entry i, so the lit tip always sits in the highlighted
+              entry; cell density follows text length, like a non-linear dial
+              scale, eased across entry boundaries. Kept for later; not in use.
 --------------------------------------------------------------------------- */
+const TOC_RAIL: 'even' | 'scale' = 'even';
+
+type RailCell = { top: number; height: number; at: number }; // at: scrollY where it lights
+const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
+
+/** xs: scrollY where each section becomes current, plus page end; ys: rail y of each entry, plus rail height. */
+function evenCells(xs: number[], _ys: number[], h: number): RailCell[] {
+  const PITCH = 5; // 3px cell + 2px gap, as the top tape
+  const [start, finish] = [xs[0], xs[xs.length - 1]];
+  const cells: RailCell[] = [];
+  // steady: a cell lights once that share of the reading is done (ys is not needed here)
+  for (let top = 0; top + 3 <= h; top += PITCH) {
+    cells.push({ top, height: 3, at: start + ((top + PITCH) / h) * (finish - start) });
+  }
+  return cells;
+}
+
+function scaleCells(xs: number[], ys: number[], h: number): RailCell[] {
+  const MIN_PITCH = 6; // shortest cell 4px + 2px gap
+  const BLUR = 20; // px of rail over which the pitch eases from one section to the next
+  const m = xs.length - 1;
+  // scroll per cell, so that an evenly spaced tape would have as many cells
+  const step = Math.max(1, (xs[m] - xs[0]) / Math.floor(h / MIN_PITCH));
+
+  // wanted pitch at every px of rail (log scale, so the blur eases evenly), then blurred
+  const H = Math.ceil(h);
+  const raw = new Float64Array(H);
+  for (let i = 0, y = 0; y < H; y++) {
+    while (i < m - 1 && y >= ys[i + 1]) i++;
+    const span = ys[i + 1] - ys[i];
+    const len = Math.max(1, xs[i + 1] - xs[i]);
+    raw[y] = Math.log(clamp((span * step) / len, MIN_PITCH, Math.max(MIN_PITCH, span)));
+  }
+  const R = Math.ceil(BLUR * 1.5);
+  const kern = Array.from({ length: 2 * R + 1 }, (_, j) => Math.exp(-(((j - R) / (BLUR / 2)) ** 2) / 2));
+  const dens = new Float64Array(H + 1); // cells per px of rail
+  for (let y = 0; y < H; y++) {
+    let sum = 0, w = 0;
+    for (let j = -R; j <= R; j++) {
+      sum += raw[clamp(y + j, 0, H - 1)] * kern[j + R];
+      w += kern[j + R];
+    }
+    dens[y] = Math.exp(-sum / w);
+  }
+  // N(y): cells from the top of the rail to y
+  const N = new Float64Array(H + 1);
+  for (let y = 0; y < H; y++) N[y + 1] = N[y] + dens[y];
+  const cellsAt = (y: number) => {
+    const y0 = clamp(Math.floor(y), 0, H - 1);
+    return N[y0] + (y - y0) * dens[y0];
+  };
+  const yOf = (goal: number, lo: number, hi: number) => {
+    // inverse of N on [lo, hi]
+    for (let k = 0; k < 24; k++) {
+      const mid = (lo + hi) / 2;
+      if (cellsAt(mid) < goal) lo = mid;
+      else hi = mid;
+    }
+    return (lo + hi) / 2;
+  };
+
+  const cells: RailCell[] = [];
+  for (let i = 0; i < m; i++) {
+    const [y0, y1] = [ys[i], ys[i + 1]];
+    const span = y1 - y0;
+    if (span < MIN_PITCH - 2) continue;
+    const [n0, n1] = [cellsAt(y0), cellsAt(y1)];
+    const n = clamp(Math.round(n1 - n0), 1, Math.max(1, Math.floor(span / MIN_PITCH)));
+    const bounds = Array.from({ length: n + 1 }, (_, k) =>
+      k === 0 ? y0 : k === n ? y1 : yOf(n0 + ((n1 - n0) * k) / n, y0, y1),
+    );
+    const len = Math.max(0, xs[i + 1] - xs[i]);
+    for (let k = 0; k < n; k++) {
+      const top = Math.round(bounds[k]);
+      const next = Math.round(bounds[k + 1]);
+      // cells tile the section with a fixed 2px gap; the first lights as it becomes current
+      cells.push({ top, height: Math.max(1, next - top - 2), at: xs[i] + ((bounds[k] - y0) / span) * len });
+    }
+  }
+  return cells;
+}
+
 function setupToc() {
   if (!has('toc')) return;
   const nav = document.querySelector<HTMLElement>('[data-toc]');
@@ -355,23 +461,50 @@ function setupToc() {
   const rail = document.createElement('span');
   rail.className = 'lamp-toc-rail';
   rail.setAttribute('aria-hidden', 'true');
-  const fill = document.createElement('i');
-  rail.appendChild(fill);
   list.prepend(rail);
 
   const links = [...list.querySelectorAll<HTMLAnchorElement>('a[href^="#"]')];
   const heads = links.map((a) => document.getElementById(decodeURIComponent(a.hash.slice(1))));
 
+  let dots: { el: HTMLElement; at: number; on: boolean }[] = [];
+  let finish = 0;
+  const layout = () => {
+    const line = innerHeight * 0.25;
+    finish = Math.max(0, document.documentElement.scrollHeight - innerHeight);
+    const railTop = rail.getBoundingClientRect().top;
+    const h = rail.clientHeight;
+    const secs = links.flatMap((a, i) =>
+      heads[i]
+        ? [{ s: Math.min(heads[i]!.getBoundingClientRect().top + scrollY - line, finish), y: clamp(a.getBoundingClientRect().top - railTop, 0, h) }]
+        : [],
+    );
+    rail.replaceChildren();
+    dots = [];
+    if (!secs.length) return;
+    const xs = [...secs.map((s) => s.s), finish];
+    const ys = [...secs.map((s) => s.y), h];
+    for (const c of (TOC_RAIL === 'scale' ? scaleCells : evenCells)(xs, ys, h)) {
+      const el = document.createElement('i');
+      el.style.top = `${c.top}px`;
+      el.style.height = `${c.height}px`;
+      rail.appendChild(el);
+      dots.push({ el, at: c.at, on: false });
+    }
+    paint();
+  };
+  const paint = () => {
+    // at the very bottom of the page light everything, even sections too short to reach the line
+    const end = scrollY >= finish - 1;
+    for (const d of dots) {
+      const on = end || scrollY > d.at;
+      if (on !== d.on) d.el.toggleAttribute('data-on', (d.on = on));
+    }
+  };
+
   const update = () => {
     const line = innerHeight * 0.25;
     links.forEach((a, i) => a.toggleAttribute('data-read', !!heads[i] && heads[i]!.getBoundingClientRect().top < line));
-    // from "first section reaches the reading line" to "bottom of the page"
-    const start = (heads[0]?.getBoundingClientRect().top ?? 0) + scrollY - line;
-    const finish = document.documentElement.scrollHeight - innerHeight;
-    const p = finish > start ? Math.min(1, Math.max(0, (scrollY - start) / (finish - start))) : 1;
-    const h = rail.clientHeight;
-    // whole cells only; at the very end light the last one too, even if the rail isn't a multiple of a cell
-    fill.style.height = p >= 0.995 ? '100%' : `${Math.floor((p * h) / 5) * 5}px`;
+    paint();
     // keep the current section visible when the TOC is taller than its box
     const active = list.querySelector<HTMLElement>('a[data-active]');
     if (active && nav.scrollHeight > nav.clientHeight) {
@@ -393,7 +526,15 @@ function setupToc() {
     },
     { passive: true },
   );
-  addEventListener('resize', update);
+  // re-space the dots whenever the page or the TOC changes height (resize, images, fonts)
+  const ro = new ResizeObserver(() => {
+    layout();
+    update();
+  });
+  ro.observe(article);
+  ro.observe(list);
+  addEventListener('resize', layout); // a taller/shorter window moves the reading line
+  layout(); // right away, not one frame later when the observer first reports
   update();
 }
 
@@ -465,6 +606,63 @@ function setupCodeScroll() {
     document.fonts?.ready.then(update);
     update();
   });
+}
+
+/* ---------------------------------------------------------------------------
+   search scroll: the results on the search screen scroll with the same thin bar
+   as code blocks (lamp-code-scroll), turned upright: a 1px guide and a 1.5px
+   glowing thumb. Drag it or click the guide.
+--------------------------------------------------------------------------- */
+function setupSearchScroll() {
+  if (!has('grille')) return;
+  const list = document.querySelector<HTMLElement>('[data-search-results]');
+  const screen = list?.closest<HTMLElement>('[data-search-screen]');
+  if (!list || !screen) return;
+  const INSET = 8; // rail inset from the top and bottom of the list
+
+  const rail = document.createElement('div');
+  rail.className = 'lamp-search-scroll';
+  rail.setAttribute('aria-hidden', 'true');
+  rail.hidden = true;
+  const thumb = document.createElement('i');
+  rail.appendChild(thumb);
+  screen.appendChild(rail);
+
+  const update = () => {
+    const max = list.scrollHeight - list.clientHeight;
+    const scrolls = max > 1;
+    rail.hidden = !scrolls;
+    screen.toggleAttribute('data-scrolls', scrolls);
+    if (!scrolls) return;
+    const track = list.clientHeight - 2 * INSET;
+    rail.style.top = `${list.offsetTop + INSET}px`;
+    rail.style.height = `${track}px`;
+    const h = Math.min(track, Math.max(24, (list.clientHeight / list.scrollHeight) * track));
+    thumb.style.height = `${h}px`;
+    thumb.style.transform = `translateY(${(list.scrollTop / max) * (track - h)}px)`;
+  };
+
+  const scrub = (clientY: number) => {
+    const max = list.scrollHeight - list.clientHeight;
+    if (max <= 1) return;
+    const r = rail.getBoundingClientRect();
+    const h = thumb.offsetHeight || 20;
+    list.scrollTop = clamp((clientY - r.top - h / 2) / Math.max(1, r.height - h), 0, 1) * max;
+  };
+  rail.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    rail.setPointerCapture(e.pointerId);
+    scrub(e.clientY);
+  });
+  rail.addEventListener('pointermove', (e) => {
+    if (rail.hasPointerCapture(e.pointerId)) scrub(e.clientY);
+  });
+
+  list.addEventListener('scroll', update, { passive: true });
+  new ResizeObserver(update).observe(list);
+  new MutationObserver(update).observe(list, { childList: true });
+  document.addEventListener('lamp:search-lines', update);
+  update();
 }
 
 function setupCardTocScroll() {
@@ -561,6 +759,7 @@ if ([...root.classList].some((c) => c.startsWith('lamp-'))) {
   setupToc();
   setupCodeGlow();
   setupCodeScroll();
+  setupSearchScroll();
   setupCardTocScroll();
   paintLines();
   let t = 0;
@@ -569,6 +768,7 @@ if ([...root.classList].some((c) => c.startsWith('lamp-'))) {
     t = window.setTimeout(paintLines, 120);
   };
   addEventListener('resize', repaint);
+  document.addEventListener('lamp:search-lines', () => paintLines(searchLineSpecs()));
   new MutationObserver(repaint).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
   document.fonts?.ready.then(repaint);
 }

@@ -4,7 +4,7 @@ import { render } from 'astro:content';
 import Column from './Column.astro';
 import PageHeader from './PageHeader.astro';
 import Toc from './Toc.astro';
-import { formatDate, getGraph, postUrl, readingMinutes, tagUrl, type Post } from '../lib/posts';
+import { getGraph, postUrl, readingMinutes, type Post } from '../lib/posts';
 
 interface Props {
   post: Post;
@@ -34,9 +34,9 @@ const label = 'mb-3 font-sans text-[13px] leading-5 font-medium text-muted-foreg
       tags.length > 0 && (
         <span class="inline-flex flex-wrap items-center gap-1.5">
           {tags.map((t) => (
-            <a class="rounded-full bg-primary/10 px-2.5 py-0.5 font-sans text-xs leading-4 text-primary transition-colors hover:bg-primary/20" href={tagUrl(t)}>
+            <button type="button" class="cursor-pointer rounded-full bg-primary/10 px-2.5 py-0.5 font-sans text-xs leading-4 text-primary transition-colors hover:bg-primary/20" data-tag={t}>
               {t}
-            </a>
+            </button>
           ))}
         </span>
       )
