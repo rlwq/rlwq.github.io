@@ -38,7 +38,7 @@ function dropLightTheme() {
 
 export default defineConfig({
   // Your site's address: used by RSS, the sitemap and social previews.
-  site: 'https://example.com',
+  site: 'https://rlwq.github.io',
 
   trailingSlash: 'always',
   // the article list lives on the home page; articles themselves stay at /blog/<name>/
