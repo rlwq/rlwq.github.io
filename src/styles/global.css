@@ -351,8 +351,7 @@ dialog.lightbox[open]::backdrop {
     0 0 22px rgb(var(--lamp-aura, 240 160 75) / calc(0.12 * var(--lamp-aura-a, 1)));
 }
 
-.lightbox-close kbd,
-.search-keys kbd {
+.lightbox-close kbd {
   border: 0;
   padding: 0;
   font-family: var(--font-mono);
@@ -361,14 +360,12 @@ dialog.lightbox[open]::backdrop {
   color: color-mix(in srgb, var(--muted-foreground) 75%, transparent);
 }
 
-.lightbox-close kbd::before,
-.search-keys kbd::before {
+.lightbox-close kbd::before {
   content: '[';
   opacity: 0.55;
 }
 
-.lightbox-close kbd::after,
-.search-keys kbd::after {
+.lightbox-close kbd::after {
   content: ']';
   opacity: 0.55;
 }

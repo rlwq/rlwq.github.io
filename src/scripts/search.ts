@@ -40,26 +40,11 @@ function initSearch(dialog: HTMLDialogElement) {
     return (start > 0 ? '…' : '') + text.slice(start, start + 150) + (start + 150 < text.length ? '…' : '');
   }
 
-  // empty query: a hint, every tag as a button (click fills in #tag) and the keys
-  function idle(all: Doc[]) {
+  // empty query: just the hint
+  function idle() {
     results.innerHTML = '';
     empty.hidden = false;
-    const count = new Map<string, { name: string; n: number }>();
-    for (const d of all)
-      for (const name of d.g.split(/\s+/).filter(Boolean)) {
-        const t = count.get(norm(name)) ?? { name, n: 0 };
-        t.n++;
-        count.set(norm(name), t);
-      }
-    const tags = [...count.values()].sort((a, b) => b.n - a.n || a.name.localeCompare(b.name));
-    empty.innerHTML =
-      `<p>Type to search titles, tags and article text.</p>` +
-      (tags.length
-        ? `<p class="mt-4 flex flex-wrap items-center gap-x-3.5 gap-y-1.5 text-[10.5px] leading-4 tracking-[0.06em] uppercase">${tags
-            .map((t) => `<button type="button" class="search-tag cursor-pointer uppercase" data-tag="${escape(t.name)}">${escape(t.name)}</button>`)
-            .join('')}</p>`
-        : '') +
-      `<p class="search-keys mt-4 text-[10.5px] leading-4 tracking-[0.06em] uppercase max-sm:hidden"><kbd>↑↓</kbd> select<span class="mx-2 opacity-50">·</span><kbd>↵</kbd> open<span class="mx-2 opacity-50">·</span><kbd>Esc</kbd> close</p>`;
+    empty.textContent = 'Type to search titles, tags and article text.';
   }
 
   let runs = 0;
@@ -70,7 +55,7 @@ function initSearch(dialog: HTMLDialogElement) {
     const turn = ++runs;
     const all = await docs;
     if (turn !== runs) return; // a newer keystroke already ran
-    if (!words.length) return idle(all);
+    if (!words.length) return idle();
     const textWords = words.filter((w) => !w.startsWith('#'));
     const scored = all
       .map((d) => {

@@ -15,9 +15,13 @@ export const GET: APIRoute = async ({ props }) => {
   const minutes = readingMinutes(post.body ?? '');
 
   const png = await renderOgImage({
+    kind: 'article',
     title: post.data.title,
     subtitle: formatDate(post.data.date),
     readTime: `${minutes} min read`,
+    date: post.data.date.toISOString().slice(0, 10),
+    minutes,
+    tags: post.data.tags,
     sections,
     // the image() field carries the file's location on disk (non-enumerable fsPath)
     cover: (post.data.cover as { fsPath?: string } | undefined)?.fsPath,
