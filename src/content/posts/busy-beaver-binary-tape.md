@@ -110,7 +110,7 @@ def Halts    (m : Machine T) : Prop           := ∃ k, HaltsIn m k
 def Diverges (m : Machine T) : Prop           := ∀ k, (m ⇒ k).isSome
 ```
 
-A machine halts in `k` steps when its program reaches `ε` after exactly `k` steps, and diverges when it can still take a step after any number of steps `k`. We denote these as `m ⇓ k`, `m⇓`, and `m⇑`, and use the same notation `p ⇓ k`, `p⇓`, and `p⇑` for a program `p` run from a blank tape. Later we will write `p ~ q` when two programs share the same halting behaviour (`∀ k, p ⇓ k ↔ q ⇓ k`).
+A machine halts in `k` steps when its program reaches `ε` after exactly `k` steps, and diverges when it can still take a step after any number of steps `k`. We denote these as `m ⇓ k`, `m⇓`, and `m⇑`, and use the same notation `p ⇓ k`, `p⇓`, and `p⇑` for a program `p` run from a blank tape. Later we will write `p ≼ q` when `q` halts in at least as many steps as `p` (`∀ k, p ⇓ k → ∃ k' ≥ k, q ⇓ k'`).
 
 ### The Busy Beaver statement
 
@@ -164,7 +164,7 @@ When we cannot settle a partial program `q` as a whole, we split the family it r
 structure Expander where
   expand     : (q : Program) → Fin q.numGaps → List Program
   cover      : ∀ {p q : Program} (i : Fin q.numGaps),
-    p° → p ⊑ q → ∃ c ∈ expand q i, ∃ p', p'° ∧ p' ⊑ c ∧ p ~ p'
+    p° → p ⊑ q → ∃ c ∈ expand q i, ∃ p', p'° ∧ p' ⊑ c ∧ p ≼ p'
   decreasing : ∀ {q c : Program} {i : Fin q.numGaps},
     c ∈ expand q i → ‖c‖° < ‖q‖°
   size       : ∀ {q c : Program} {i : Fin q.numGaps},
@@ -277,7 +277,7 @@ The full Lean 4 formalisation is available at [github.com/rlwq/BBBTape](https://
 [^7]: `Option.bind` composes steps [monadically](https://en.wikipedia.org/wiki/Monad_(functional_programming)): if any intermediate step returns `none`, the rest of the chain short-circuits to `none`.
 [^8]: Possibly none — refinement is reflexive, so every program refines itself (`p ⊑ p`).
 [^9]: The replacement programs may themselves contain gaps — for instance, `*[ω2] ⊑ ω1[ω2]`.
-[^10]: Allowing `p ~ p'` instead of `p = p'` lets the expander drop entire branches, as long as every dropped program has an equivalent twin among the remaining children. For example, swapping every `<` with `>` gives an equivalent program, since the blank tape is symmetric, so it can keep only programs whose first move is `<`.
+[^10]: Allowing `p ≼ p'` instead of `p = p'` lets the expander drop entire branches, as long as every dropped program is matched or exceeded in halting time by one among the remaining children. For example, swapping every `<` with `>` gives an equivalent program by symmetry, and any program that does not start with `*` can move its leading steps on the blank tape to the end — so only programs starting with `*` (and `<<<...<`) need to be searched.
 [^11]: `decreasing` guarantees that expansion cannot go on forever: every child is strictly less unknown than its parent, measured by `‖c‖°`, the total size of its gaps (so `c°` means `‖c‖° = 0`).
 [^12]: The expander actually used in the code is considerably more involved — for instance, it skips mirrored programs.
 [^13]: `stuck` ends the chain as well: a program whose execution reaches a gap neither halts nor runs forever, so no other decider could settle it.
