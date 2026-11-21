@@ -119,8 +119,8 @@ html.lamp-mono :is(
 html.lamp-ui [data-site-header] {
   border-bottom: 0;
   background-color: color-mix(in srgb, var(--background) 84%, transparent);
-  backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
 }
 html.lamp-ui main hr {
   border: 0;
