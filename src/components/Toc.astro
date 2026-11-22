@@ -1,5 +1,6 @@
 ---
 import type { MarkdownHeading } from 'astro';
+import { plural } from '../lib/posts';
 
 interface Props {
   headings: MarkdownHeading[];
@@ -38,9 +39,13 @@ const first = (i: number) => (headings[i].depth === 3 && headings[i - 1]?.depth 
       </nav>
     </aside>
   ) : (
-    <details class="group -mt-2 mb-9 rounded-md border py-2.5 pr-4 pl-7 wide:hidden">
-      <summary class="-ml-3 cursor-pointer font-sans text-[13px] font-medium text-muted-foreground group-open:mb-3">Contents</summary>
-      <ol class="font-sans text-[13px] leading-[19px]">
+    <details class="group toc-fold -mt-2 mb-9 rounded-md border wide:hidden" data-toc-fold>
+      <summary class="flex cursor-pointer list-none items-center gap-2 px-3 py-2 font-sans text-[13px] font-medium text-muted-foreground [&::-webkit-details-marker]:hidden">
+        <span class="toc-fold-label">Contents</span>
+        <span class="toc-fold-count ml-auto">{plural(headings.filter((h) => h.depth === 2).length, 'section')}</span>
+        <span class="toc-fold-sign" aria-hidden="true"></span>
+      </summary>
+      <ol class="toc-fold-screen relative py-3 pr-4 pl-7 font-sans text-[13px] leading-[19px]">
         {headings.map((h, i) => (
           <li class={item(h.depth)} data-depth={h.depth}>
             <a class={link} href={`#${h.slug}`} data-branch={branch(i)} data-parent={parent(i)} data-first={first(i)}>

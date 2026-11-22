@@ -75,6 +75,10 @@ function lineSpecs(): LineSpec[] {
     if (parseFloat(getComputedStyle(el).borderLeftWidth) > 0)
       specs.push({ el, side: 'left', thick: CELL, color: () => cssVar('--primary'), peak: 0.75 });
   });
+  // the fold-out CONTENTS on narrow screens: its bar is a .code-bar, same line under it
+  document.querySelectorAll<HTMLElement>('details[data-toc-fold][open] > summary').forEach((el) =>
+    specs.push({ el, side: 'bottom', thick: 2, cell: 1, flip: true, color: () => cssVar('--border'), peak: 0.9 }),
+  );
   document.querySelectorAll<HTMLElement>('main .code-bar').forEach((el) =>
     specs.push({ el, side: 'bottom', thick: 2, cell: 1, flip: true, color: () => cssVar('--border'), peak: 0.9 }),
   );
@@ -769,6 +773,14 @@ if ([...root.classList].some((c) => c.startsWith('lamp-'))) {
   };
   addEventListener('resize', repaint);
   document.addEventListener('lamp:search-lines', () => paintLines(searchLineSpecs()));
+  document.querySelectorAll<HTMLDetailsElement>('details[data-toc-fold]').forEach((d) =>
+    d.addEventListener('toggle', () => {
+      const bar = d.querySelector<HTMLElement>(':scope > summary');
+      if (!bar) return;
+      if (d.open) paintLines();
+      else bar.style.backgroundImage = '';
+    }),
+  );
   new MutationObserver(repaint).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
   document.fonts?.ready.then(repaint);
 }

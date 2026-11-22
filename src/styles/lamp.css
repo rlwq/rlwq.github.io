@@ -1076,3 +1076,140 @@ html.lamp-meta main tbody tr:last-child td {
     animation: none !important;
   }
 }
+
+/* ---- toc (narrow screens): the fold-out CONTENTS as a code block ------------------
+   The bar is the bezel (.code-bar): amber pixel, label, section count and [+]/[−] in
+   brackets like footnotes; opened, the list sits on the same recessed screen with the
+   quiet pixel + scanline grid. lamp.ts paints the dithered line under the bar. */
+html.lamp-toc details[data-toc-fold] {
+  position: relative;
+  isolation: isolate;
+  border: 0;
+  border-radius: 5px;
+}
+html.lamp-toc details[data-toc-fold] > summary {
+  position: relative;
+  z-index: 4;
+  min-height: 32px;
+  padding: 4px 12px;
+  background-color: var(--muted);
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 500;
+  -webkit-tap-highlight-color: transparent;
+  transition: border-radius 0ms 220ms;
+}
+html.lamp-toc details[data-toc-fold][open] > summary {
+  border-radius: 5px 5px 0 0;
+  transition-delay: 0ms;
+}
+html.lamp-toc details[data-toc-fold] .toc-fold-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--foreground);
+}
+html.lamp-toc details[data-toc-fold] .toc-fold-label::before {
+  content: '';
+  width: 4px;
+  height: 4px;
+  flex: none;
+  background: var(--primary);
+  box-shadow: 0 0 4px rgb(var(--lamp-aura, 240 160 75) / 0.65);
+  transition: box-shadow var(--lamp-out, 350ms) var(--lamp-out-ease, ease);
+}
+html.lamp-toc details[data-toc-fold][open] .toc-fold-label::before {
+  transition-duration: var(--lamp-in, 120ms);
+  box-shadow:
+    0 0 5px rgb(var(--lamp-aura, 240 160 75) / 0.9),
+    0 0 12px rgb(var(--lamp-aura, 240 160 75) / 0.5);
+}
+html.lamp-toc details[data-toc-fold] .toc-fold-count {
+  font-size: 10.5px;
+  color: var(--muted-foreground);
+}
+html.lamp-toc details[data-toc-fold] .toc-fold-sign {
+  width: 3ch;
+  text-align: center;
+  color: var(--primary);
+  letter-spacing: 0;
+}
+html.lamp-toc details[data-toc-fold] .toc-fold-sign::before {
+  content: '[+]';
+}
+html.lamp-toc details[data-toc-fold][open] .toc-fold-sign::before {
+  content: '[\2212]';
+}
+/* the screen: recessed glass, vignette and inner rim, as under a code block */
+html.lamp-toc details[data-toc-fold] .toc-fold-screen {
+  margin: 0;
+  border-radius: 0 0 5px 5px;
+  background-color: #1b1b1a;
+  background-image:
+    radial-gradient(ellipse 84% 110% at 50% 45%, transparent 52%, rgb(0 0 0 / 0.24) 100%),
+    radial-gradient(ellipse 90% 90% at 50% 0%, rgb(255 255 255 / 0.03) 0%, transparent 60%);
+  box-shadow:
+    inset 0 0 0 1px rgb(0 0 0 / 0.24),
+    inset 0 2px 14px rgb(0 0 0 / 0.22);
+}
+html.lamp-toc details[data-toc-fold] .toc-fold-screen::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: inherit;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+  background-image:
+    repeating-linear-gradient(to bottom, transparent 0 2px, rgb(0 0 0 / 0.14) 2px 3px),
+    repeating-linear-gradient(to right, rgb(255 230 230) 0 1px, rgb(230 255 230) 1px 2px, rgb(230 230 255) 2px 3px);
+}
+html.lamp-toc[data-theme='light'] details[data-toc-fold] .toc-fold-screen {
+  background-color: #f3f2ef;
+  box-shadow:
+    inset 0 0 0 1px rgb(0 0 0 / 0.04),
+    inset 0 1px 10px rgb(0 0 0 / 0.04);
+}
+/* opens like the search dialog: the screen fades in under the bar */
+html.lamp-toc details[data-toc-fold]::details-content {
+  opacity: 0;
+  transition:
+    opacity 220ms ease,
+    content-visibility 220ms allow-discrete;
+}
+html.lamp-toc details[data-toc-fold][open]::details-content {
+  opacity: 1;
+}
+
+/* ---- sidenotes (narrow screens): the amber rule glows ------------------------------
+   Under the line, a note keeps its dithered amber rule on the left (lamp.ts); behind it
+   sits a soft phosphor halo, wide diffuse layers only, like links. It fades out towards
+   both ends, as the dithered rule does. */
+@media (width < 78.75rem) {
+  html.lamp-glow .sidenote {
+    position: relative;
+    isolation: isolate;
+  }
+  /* a wide soft band centred on the 2px rule, under the text: no tight core */
+  html.lamp-glow .sidenote::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -19px;
+    width: 36px;
+    z-index: -1;
+    pointer-events: none;
+    background: linear-gradient(
+      to right,
+      transparent,
+      rgb(var(--lamp-aura, 240 160 75) / 0.045) 35%,
+      rgb(var(--lamp-aura, 240 160 75) / 0.09) 50%,
+      rgb(var(--lamp-aura, 240 160 75) / 0.045) 65%,
+      transparent
+    );
+    filter: blur(4px);
+    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 28%, #000 72%, transparent);
+    mask-image: linear-gradient(to bottom, transparent, #000 28%, #000 72%, transparent);
+  }
+}
