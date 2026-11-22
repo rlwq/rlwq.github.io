@@ -244,19 +244,9 @@ theorem bb14 : IsBB 14 158 :=
   IsBB.of_search .tnf fullChain (by native_decide)
 ```
 
-## Beyond fourteen
-
-Past length 14 the same search keeps working, but each new length leaves a handful of holdouts that the deciders cannot settle, and the chain grows with them.
-
-Some holdouts simply halt late: the champion of length 18 runs for 12,202 steps, far more than the first simulator in the chain is allowed. Others are binary counters whose digits sit two or three cells apart. To recognise them, the pattern-based decider learned to remember the position of every cell modulo a period $P$.[^16]
-
-Two programs of length 18, `*[[<*<]*>>[*>>]<*]` and `*[[*<<]>*[>*>]*<<]`, resisted every decider. Each is a binary counter dragging a growing trail across the tape. Their divergence is proved by hand: an explicit description of the tape that holds before every pass of the outer loop and is shown to hold again after it. A decider that recognises exactly these two programs plugs the proofs into the chain.
-
-On a single core, the search for length 18 takes about fourteen minutes. So its tree is cut three levels below the root, and the 28,202 subtrees are spread over 32 files that Lean checks in parallel.
-
 ## Conclusion
 
-Every value up to length 18 is proved this way. Here they all are, together with the number of programs of each length and one of its champions:[^15]
+Any other value up to length 14 is proved the same way. Here they all are, together with the number of programs of each length and one of its champions:[^15]
 
 | $n$ |        Programs | $\mathrm{BB}(n)$ | Champion             |
 | --- | --------------: | ---------------: | -------------------- |
@@ -279,7 +269,7 @@ Every value up to length 18 is proved this way. Here they all are, together with
 | 17  |  29,323,149,825 |              871 | `*[[<*<*[>]>]<*<<]`  |
 | 18  | 135,700,543,190 |           12,202 | `*<*[<*[<<*[>]*>]<]` |
 
-All of these values come from the same search: the effort goes into a few general deciders, each proved sound once, and only two programs needed proofs of their own. The bbchallenge wiki listed $\mathrm{BB}(18) \ge 7{,}981$ as the best known bound.
+All of these values come from the same search: the effort goes into a few general deciders, each proved sound once.
 The full Lean 4 formalisation is available at [github.com/rlwq/BBBTape](https://github.com/rlwq/BBBTape).
 
 [^1]: Non-halting machines are not counted — otherwise the answer would trivially be infinite. Separating them from machines that merely run for a very long time is what makes the function [uncomputable](https://en.wikipedia.org/wiki/Halting_problem).
@@ -297,4 +287,3 @@ The full Lean 4 formalisation is available at [github.com/rlwq/BBBTape](https://
 [^13]: `stuck` ends the chain as well: a program whose execution reaches a gap neither halts nor runs forever, so no other decider could settle it.
 [^14]: `attach` pairs each child with a proof that it came from `expand`, so that `decreasing_by` can use `decreasing` on it.
 [^15]: Champions are not unique: for example, for $n \le 5$, any program without loops takes exactly $n$ steps, and mirroring a champion always gives another one.
-[^16]: Without the period, windows taken at different offsets inside a digit get mixed up, and the decider believes the counter might halt.
