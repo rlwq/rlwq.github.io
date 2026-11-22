@@ -246,7 +246,7 @@ theorem bb14 : IsBB 14 158 :=
 
 ## Conclusion
 
-Any other value up to length 14 is proved the same way. Here they all are, together with the number of programs of each length and one of its champions:[^15]
+Every other value in the table below is proved the same way. Here they all are, together with the number of programs of each length and one of its champions:[^15]
 
 | $n$ |        Programs | $\mathrm{BB}(n)$ | Champion             |
 | --- | --------------: | ---------------: | -------------------- |
