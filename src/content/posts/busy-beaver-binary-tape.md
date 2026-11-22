@@ -237,11 +237,11 @@ theorem IsBB.of_search (e : Expander) (d : Decider) {n B : Nat} :
 
 Every program of length `n` refines `ωn`, so it either runs forever or halts within `B` steps. And the program that achieves `B` is a partial program of length `n` that halts in `B` steps, so filling its gaps with anything gives a gap-free one that does too.
 
-With `Ξ₂` concatenating nine deciders, the whole proof that $\mathrm{BB}(14) = 158$ fits in a line:
+With `Φ₁` expanding gaps in Tree Normal Form and `Ξ₂` concatenating nine deciders, the whole proof that $\mathrm{BB}(14) = 158$ fits in a line:
 
 ```lean
 theorem bb14 : IsBB 14 158 :=
-  IsBB.of_search .tnf Ξ₂ (by native_decide)
+  IsBB.of_search Φ₁ Ξ₂ (by native_decide)
 ```
 
 ## Conclusion
