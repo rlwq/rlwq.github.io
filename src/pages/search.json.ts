@@ -1,4 +1,4 @@
-import { clip, getGraph, getPosts, postUrl, readingMinutes, toPlain } from '../lib/posts';
+import { clip, getGraph, getPosts, isoDay, postUrl, readingMinutes, toPlain } from '../lib/posts';
 
 // Small search index: title, url, tags, date, minutes to read and the first part of the text.
 export async function GET() {
@@ -8,7 +8,7 @@ export async function GET() {
     t: n.data.title,
     u: postUrl(n.id),
     g: n.data.tags.join(' '),
-    d: n.data.date.toISOString().slice(0, 10),
+    d: isoDay(n.data.date),
     m: readingMinutes(n.body ?? ''),
     x: clip(toPlain(n.body ?? '', titleOf), 6000),
   }));

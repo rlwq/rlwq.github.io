@@ -1,6 +1,7 @@
 // The "lamp" layer: behaviour for the effects in styles/lamp.css. Each part checks its
 // html.lamp-<feature> class (set in Base.astro) and does nothing without it.
 import '@fontsource/ibm-plex-mono/400.css';
+import '@fontsource/ibm-plex-mono/400-italic.css';
 import '@fontsource/ibm-plex-mono/500.css';
 import '@fontsource/vt323/400.css';
 import '../styles/lamp.css';
@@ -9,9 +10,9 @@ const root = document.documentElement;
 const has = (feature: string) => root.classList.contains(`lamp-${feature}`);
 
 /* ---------------------------------------------------------------------------
-   ui: dithered lines. A line is a strip of 2px cells lit by a 4×4 Bayer
-   threshold against a density profile, so it fades out in a dither instead of
-   a smooth gradient. Painted per element and repainted on resize/theme change.
+   ui: dithered lines. A line is a strip of cells lit by a Bayer threshold
+   against a density profile, so it fades out in a dither instead of a smooth
+   gradient. Painted per element and repainted on resize/theme change.
 --------------------------------------------------------------------------- */
 const CELL = 2;
 const BAYER4 = [
@@ -21,11 +22,20 @@ const BAYER4 = [
   [15, 7, 13, 5],
 ].map((row) => row.map((v) => (v + 0.5) / 16));
 
+/** Symmetric 2-row Bayer weave: both rows share identical thresholds (shifted by 1px),
+ *  producing a monotone, non-directional 2px dither (75% weave -> 50% checker -> 25% -> 0). */
+const EVEN2 = [
+  [1, 5, 3, 7],
+  [5, 1, 7, 3],
+].map((row) => row.map((v) => v / 8));
+
 type Profile = (t: number) => number;
 /** solid in the middle, dithering out towards both ends */
 const fadeEnds: Profile = (t) => Math.min(1, Math.min(t, 1 - t) / 0.28);
 
-function strip(len: number, thick: number, vertical: boolean, color: string, profile: Profile, peak = 1, cell = CELL, flip = false) {
+type StripMode = 'directional' | 'even';
+
+function strip(len: number, thick: number, vertical: boolean, color: string, profile: Profile, peak = 1, cell = CELL, mode: StripMode = 'directional') {
   const n = Math.max(1, Math.round(len / cell));
   const m = Math.max(1, Math.round(thick / cell));
   const c = document.createElement('canvas');
@@ -36,12 +46,8 @@ function strip(len: number, thick: number, vertical: boolean, color: string, pro
   for (let i = 0; i < n; i++) {
     const a = profile(n === 1 ? 0.5 : i / (n - 1)) * peak;
     for (let j = 0; j < m; j++) {
-      const bj = flip ? m - 1 - j : j;
-      const x = vertical ? j : i;
-      const y = vertical ? i : j;
-      const bx = vertical ? bj : i;
-      const by = vertical ? i : bj;
-      if (a > BAYER4[by & 3][bx & 3]) ctx.fillRect(x, y, 1, 1);
+      const th = mode === 'even' ? EVEN2[j & 1][i & 3] : BAYER4[j & 3][i & 3];
+      if (a > th) ctx.fillRect(vertical ? j : i, vertical ? i : j, 1, 1);
     }
   }
   return c.toDataURL();
@@ -49,60 +55,55 @@ function strip(len: number, thick: number, vertical: boolean, color: string, pro
 
 const cssVar = (name: string) => getComputedStyle(root).getPropertyValue(name).trim();
 
-interface LineSpec {
-  el: HTMLElement;
-  side: 'top' | 'bottom' | 'left' | 'right';
+type Side = 'top' | 'bottom' | 'left' | 'right';
+interface Line {
   thick: number;
   color: () => string;
   peak?: number;
   cell?: number;
-  flip?: boolean;
+  mode?: StripMode;
 }
+interface LineSpec extends Line {
+  el: HTMLElement;
+  side: Side;
+}
+
+const border = () => cssVar('--border');
+const accent = () => cssVar('--primary');
+/** The three kinds of dithered rule, so the same kind of edge looks the same everywhere: */
+const LINE = {
+  /** the edge of a header (the site's, a table's): 2 rows, the denser one on top */
+  edge: { thick: 2, cell: 1, color: border, peak: 0.9 },
+  /** under a bezel bar (code, search, fold-out contents) and the About divider:
+   *  2 even rows, no side heavier than the other */
+  bezel: { thick: 2, cell: 1, mode: 'even', color: border, peak: 0.78 },
+  /** between rows of one list (table rows, search hits): 1px */
+  row: { thick: 1, cell: 1, color: border, peak: 0.72 },
+} satisfies Record<string, Line>;
 
 function lineSpecs(): LineSpec[] {
   const specs: LineSpec[] = [];
-  const header = document.querySelector<HTMLElement>('[data-site-header]');
-  if (header) specs.push({ el: header, side: 'bottom', thick: 2, cell: 1, color: () => cssVar('--border'), peak: 0.9 });
+  const all = (selector: string, side: Side, line: Line) =>
+    document.querySelectorAll<HTMLElement>(selector).forEach((el) => specs.push({ el, side, ...line }));
 
-  document.querySelectorAll<HTMLElement>('main hr').forEach((el) =>
-    specs.push({ el, side: 'top', thick: 4, color: () => cssVar('--primary'), peak: 0.9 }),
-  );
-  document.querySelectorAll<HTMLElement>('main blockquote').forEach((el) =>
-    specs.push({ el, side: 'left', thick: 4, color: () => cssVar('--muted-foreground'), peak: 0.8 }),
-  );
+  all('[data-site-header]', 'bottom', LINE.edge);
+  all('main thead', 'bottom', LINE.edge);
+  all('main tbody tr:not(:last-child)', 'bottom', LINE.row);
+  all('main .code-bar', 'bottom', LINE.bezel);
+  // the fold-out CONTENTS on narrow screens: its bar is a bezel like .code-bar
+  all('details[data-toc-fold][open] > summary', 'bottom', LINE.bezel);
+  // accent rules: section breaks, and a sidenote under the line (not floated in the margin)
+  all('main hr', 'top', { thick: 4, color: accent, peak: 0.9 });
   document.querySelectorAll<HTMLElement>('main .sidenote').forEach((el) => {
-    // only while the sidenote sits under the line with a left rule (not floated in the margin)
-    if (parseFloat(getComputedStyle(el).borderLeftWidth) > 0)
-      specs.push({ el, side: 'left', thick: CELL, color: () => cssVar('--primary'), peak: 0.75 });
+    if (parseFloat(getComputedStyle(el).borderLeftWidth) > 0) specs.push({ el, side: 'left', thick: CELL, color: accent, peak: 0.75 });
   });
-  // the fold-out CONTENTS on narrow screens: its bar is a .code-bar, same line under it
-  document.querySelectorAll<HTMLElement>('details[data-toc-fold][open] > summary').forEach((el) =>
-    specs.push({ el, side: 'bottom', thick: 2, cell: 1, flip: true, color: () => cssVar('--border'), peak: 0.9 }),
-  );
-  document.querySelectorAll<HTMLElement>('main .code-bar').forEach((el) =>
-    specs.push({ el, side: 'bottom', thick: 2, cell: 1, flip: true, color: () => cssVar('--border'), peak: 0.9 }),
-  );
-  document.querySelectorAll<HTMLElement>('main thead').forEach((el) =>
-    specs.push({ el, side: 'bottom', thick: 2, cell: 1, color: () => cssVar('--border'), peak: 0.9 }),
-  );
-  document.querySelectorAll<HTMLElement>('main tbody tr:not(:last-child)').forEach((el) =>
-    specs.push({ el, side: 'bottom', thick: 1, cell: 1, color: () => cssVar('--border'), peak: 0.72 }),
-  );
-  const homeAbout = document.querySelector<HTMLElement>('[data-home-about]');
-  if (homeAbout) {
-    if (innerWidth >= 1024) {
-      specs.push({ el: homeAbout, side: 'right', thick: 2, cell: 1, color: () => cssVar('--border'), peak: 0.9 });
-    } else {
-      homeAbout.style.backgroundImage = '';
-      delete homeAbout.dataset.lampLine;
-    }
+  // the divider right of ABOUT on the home page, only while the columns sit side by side
+  const about = document.querySelector<HTMLElement>('[data-home-about]');
+  if (about && innerWidth >= 1024) specs.push({ el: about, side: 'right', ...LINE.bezel });
+  else if (about) {
+    about.style.backgroundImage = '';
+    delete about.dataset.lampLine;
   }
-  document.querySelectorAll<HTMLElement>('ul.grid article nav').forEach((el) => {
-    const onCover = !!el.closest('article')?.querySelector('img');
-    const s = getComputedStyle(el);
-    const side = parseFloat(s.borderLeftWidth) > 0 ? 'left' : 'top';
-    specs.push({ el, side, thick: 2, cell: 1, color: () => (onCover ? 'rgba(255,255,255,0.22)' : cssVar('--border')), peak: 0.9 });
-  });
   return specs;
 }
 
@@ -111,23 +112,78 @@ function lineSpecs(): LineSpec[] {
 function searchLineSpecs(): LineSpec[] {
   const specs: LineSpec[] = [];
   const bar = document.querySelector<HTMLElement>('[data-search-bar]');
-  // the bezel's lower edge, as under .code-bar on code blocks
-  if (bar) specs.push({ el: bar, side: 'bottom', thick: 2, cell: 1, flip: true, color: () => cssVar('--border'), peak: 0.9 });
-  // between hits, as between table rows
-  document.querySelectorAll<HTMLElement>('[data-search-results] li + li').forEach((el) =>
-    specs.push({ el, side: 'top', thick: 1, cell: 1, color: () => cssVar('--border'), peak: 0.72 }),
-  );
+  if (bar) specs.push({ el: bar, side: 'bottom', ...LINE.bezel });
+  document.querySelectorAll<HTMLElement>('[data-search-results] li + li').forEach((el) => specs.push({ el, side: 'top', ...LINE.row }));
   return specs;
 }
 
+/* ---------------------------------------------------------------------------
+   glare: the lamp's light caught by the glass. One source at the top left (130°),
+   a 4-shade dither on a 4×4 Bayer grid of 2px cells, faint amber, fading out
+   over 60% of the diagonal. Painted under the content of every glass that holds
+   text: the elements marked [data-glare] and the code blocks (lamp.css "glare").
+--------------------------------------------------------------------------- */
+const GLARE = '[data-glare], .code-block pre';
+const glared = new WeakMap<HTMLElement, string>();
+
+function paintGlare(selector = GLARE) {
+  if (!has('glare')) return;
+  const cell = 2;
+  const shades = 3; // + the bare surface = 4
+  const light = root.dataset.theme === 'light';
+  const alpha = light ? 0.14 : 0.042;
+  const [r, g, b] = [242, 186, 118]; // warm lamp light, paler than the accent
+  const curve = 2.3;
+  const reach = 0.6;
+  const angle = (130 * Math.PI) / 180;
+  const dx = Math.sin(angle);
+  const dy = -Math.cos(angle);
+
+  document.querySelectorAll<HTMLElement>(selector).forEach((el) => {
+    const W = el.offsetWidth;
+    const H = el.offsetHeight;
+    const key = `${W}x${H}${light ? 'l' : 'd'}`;
+    if (W < 8 || H < 8 || glared.get(el) === key) return;
+    glared.set(el, key);
+    const cw = Math.ceil(W / cell);
+    const ch = Math.ceil(H / cell);
+    const c = document.createElement('canvas');
+    c.width = cw;
+    c.height = ch;
+    const ctx = c.getContext('2d')!;
+    const img = ctx.createImageData(cw, ch);
+    const d = img.data;
+    const pMin = cw * Math.min(0, dx) + ch * Math.min(0, dy);
+    const span = Math.max(1, cw * Math.max(0, dx) + ch * Math.max(0, dy) - pMin);
+    for (let y = 0; y < ch; y++) {
+      for (let x = 0; x < cw; x++) {
+        const t = (x * dx + y * dy - pMin) / span;
+        if (t >= reach) continue;
+        const v = Math.pow(1 - t / reach, curve) * 0.94;
+        const step = Math.min(shades, Math.floor(v * shades + BAYER4[y & 3][x & 3]));
+        if (step <= 0) continue;
+        const i = (y * cw + x) * 4;
+        d[i] = r;
+        d[i + 1] = g;
+        d[i + 2] = b;
+        d[i + 3] = Math.round(255 * alpha * (step / shades));
+      }
+    }
+    ctx.putImageData(img, 0, 0);
+    el.style.setProperty('--glare-img', `url(${c.toDataURL()})`);
+    el.style.setProperty('--glare-size', `${cw * cell}px ${ch * cell}px`);
+  });
+}
+
 function paintLines(specs: LineSpec[] = [...lineSpecs(), ...searchLineSpecs()]) {
+  paintGlare();
   if (!has('ui')) return;
-  for (const { el, side, thick, color, peak, cell = CELL, flip = false } of specs) {
+  for (const { el, side, thick, color, peak, cell = CELL, mode = 'directional' } of specs) {
     const vertical = side === 'left' || side === 'right';
     // layout size, not the on-screen box: a dialog mid-way through its open animation is scaled
     const len = vertical ? el.offsetHeight : el.offsetWidth;
     if (len < 4) continue;
-    const url = strip(len, thick, vertical, color(), fadeEnds, peak, cell, flip);
+    const url = strip(len, thick, vertical, color(), fadeEnds, peak, cell, mode);
     // keep any existing background colour (the header has one); the line is an extra image layer
     el.dataset.lampLine = '';
     el.style.backgroundImage = `url(${url})`;
@@ -140,7 +196,7 @@ function paintLines(specs: LineSpec[] = [...lineSpecs(), ...searchLineSpecs()]) 
    tape: reading progress on article pages, filled one 8px cell at a time
 --------------------------------------------------------------------------- */
 function setupTape() {
-  if (!has('tape') || !/^\/blog\/[^/]+\/?$/.test(location.pathname)) return;
+  if (!has('tape') || !/^\/(blog|projects)\/[^/]+\/?$/.test(location.pathname)) return;
   const bar = document.createElement('div');
   bar.className = 'lamp-tape-bar';
   bar.setAttribute('aria-hidden', 'true');
@@ -544,8 +600,8 @@ function setupToc() {
 
 /* ---------------------------------------------------------------------------
    grille: a non-selectable blurred bloom clone of <code> layered under the
-   pixel-grid overlay, plus a custom cell-tape horizontal scrollbar on
-   overflowing code blocks (matching lamp-toc-rail / lamp-tape).
+   pixel-grid overlay, plus a thin scroll bar (1px guide, 1.5px glowing thumb)
+   on code blocks that overflow sideways.
 --------------------------------------------------------------------------- */
 function setupCodeGlow() {
   if (!has('grille')) return;
@@ -773,6 +829,9 @@ if ([...root.classList].some((c) => c.startsWith('lamp-'))) {
   };
   addEventListener('resize', repaint);
   document.addEventListener('lamp:search-lines', () => paintLines(searchLineSpecs()));
+  // the search screen grows and shrinks with its results
+  const searchScreen = document.querySelector<HTMLElement>('.search-screen');
+  if (searchScreen) new ResizeObserver(() => paintGlare('.search-screen')).observe(searchScreen);
   document.querySelectorAll<HTMLDetailsElement>('details[data-toc-fold]').forEach((d) =>
     d.addEventListener('toggle', () => {
       const bar = d.querySelector<HTMLElement>(':scope > summary');

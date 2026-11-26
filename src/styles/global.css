@@ -4,94 +4,118 @@
 @custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
 
 /* ---------------------------------------------------------------------------
-   Palette "graphite and amber". Utilities: bg-background, text-foreground,
-   text-primary, bg-muted, text-muted-foreground, border-border, ...
+   Design tokens. Every colour, surface, shadow, glow and timing on the site comes
+   from here; components and lamp.css only pick tokens.
+   Dark is the default; the light palette applies only with data-theme="light"
+   (hidden for now: see lightTheme in site.config.ts; those rules never ship).
 --------------------------------------------------------------------------- */
-/* Dark is the default; the light palette below applies only with data-theme="light"
-   (hidden for now: see lightTheme in site.config.ts). */
 :root,
 [data-theme='dark'] {
-  --radius: 0.375rem;
+  /* palette "graphite and amber": bg-background, text-foreground, text-primary,
+     bg-muted, text-muted-foreground, border-border, bg-tube */
   --background: #121212;
   --foreground: #e7e5e2;
-  --card: #171716;
-  --card-foreground: #e7e5e2;
-  --popover: #1a1a19;
-  --popover-foreground: #e7e5e2;
   --primary: #f0a04b;
-  --primary-foreground: #121212;
-  --secondary: #1a1a19;
-  --secondary-foreground: #e7e5e2;
   --muted: #1a1a19;
   --muted-foreground: #a19e98;
-  --accent: #212120;
-  --accent-foreground: #e7e5e2;
-  --destructive: #ef7d72;
   --border: #292826;
-  --input: #292826;
   --ring: #f0a04b;
-  /* callouts and code */
+  --radius: 0.375rem;
+  /* callout inks; no yellow: a warning is inked in the accent */
   --note: #7aa7e8;
   --tip: #8fc07a;
-  --warning: #e3c454;
   --danger: #ef7d72;
+
+  /* surfaces */
+  --surface-screen: #1b1b1a; /* glass set into the page: code, contents, search, diagrams */
+  --surface-tube: #161616; /* the CRT tubes of the home cards, dark in both themes */
+  --surface-print: #181817; /* quotes and callouts: a matte printout */
+
+  /* depth: a screen is set into the page; a tube sits deeper, behind curved glass */
+  --vignette-panel: radial-gradient(ellipse 84% 112% at 50% 45%, transparent 52%, rgb(0 0 0 / 0.26) 100%);
+  --shadow-recess: inset 0 2px 14px rgb(0 0 0 / 0.22);
+  --vignette-tube: radial-gradient(ellipse 78% 112% at 50% 44%, transparent 46%, rgb(0 0 0 / 0.48) 100%);
+  --shadow-tube:
+    inset 0 2px 12px rgb(0 0 0 / 0.36),
+    inset 0 0 26px rgb(0 0 0 / 0.44);
+  --screen-grid:
+    repeating-linear-gradient(to bottom, transparent 0 2px, rgb(0 0 0 / 0.12) 2px 3px),
+    repeating-linear-gradient(to right, rgb(255 232 232) 0 1px, rgb(232 255 232) 1px 2px, rgb(232 232 255) 2px 3px);
+  --shadow-modal: 0 24px 64px rgb(0 0 0 / 0.62);
+  --backdrop-bg: rgb(0 0 0 / 0.68);
+
+  /* light. Everything that glows takes the accent, in wide diffuse layers only: no tight
+     core around the letters. An unlit state keeps the same radii, so light fades in and
+     out instead of growing from a point. */
+  --aura: 0 0 12px color-mix(in srgb, var(--primary) 34%, transparent), 0 0 28px color-mix(in srgb, var(--primary) 16%, transparent);
+  --aura-off: 0 0 12px transparent, 0 0 28px transparent;
+  /* small amber glyphs that are on: TOC numbers, search matches */
+  --aura-sm: 0 0 8px color-mix(in srgb, var(--primary) 55%, transparent), 0 0 18px color-mix(in srgb, var(--primary) 22%, transparent);
+  /* the frame of a hovered card */
+  --card-aura: 0 0 14px color-mix(in srgb, var(--primary) 8%, transparent), 0 0 32px color-mix(in srgb, var(--primary) 4%, transparent);
+  --card-aura-off: 0 0 14px transparent, 0 0 32px transparent;
+  /* indicator pixels glow in their own colour (currentColor) */
+  --led-idle: 0 0 4px color-mix(in srgb, currentColor 70%, transparent);
+  --led-active: 0 0 5px color-mix(in srgb, currentColor 95%, transparent), 0 0 11px color-mix(in srgb, currentColor 50%, transparent);
+  /* the lit cells of the reading-progress tapes */
+  --cell-glow: drop-shadow(0 0 3px color-mix(in srgb, var(--primary) 60%, transparent));
+
+  /* motion: light comes on fast and goes out slower (the afterglow effect slows it more) */
+  --lamp-in: 120ms;
+  --lamp-out: 350ms;
+  --lamp-out-ease: ease;
+
   color-scheme: dark;
 }
 
 [data-theme='light'] {
   --background: #fafaf9;
   --foreground: #1c1b1a;
-  --card: #fafaf9;
-  --card-foreground: #1c1b1a;
-  --popover: #ffffff;
-  --popover-foreground: #1c1b1a;
   --primary: #b45309;
-  --primary-foreground: #fafaf9;
-  --secondary: #f2f1ee;
-  --secondary-foreground: #1c1b1a;
   --muted: #f2f1ee;
   --muted-foreground: #5f5d59;
-  --accent: #f2f1ee;
-  --accent-foreground: #1c1b1a;
-  --destructive: #b3261e;
   --border: #e2e0dc;
-  --input: #e2e0dc;
   --ring: #b45309;
-  /* callouts and code */
   --note: #2f6db5;
   --tip: #3d7d3a;
-  --warning: #8f7400;
   --danger: #b3261e;
+  --surface-screen: #f3f2ef;
+  --surface-print: #f4f3f0;
+  --vignette-panel: radial-gradient(ellipse 84% 112% at 50% 45%, transparent 56%, rgb(0 0 0 / 0.05) 100%);
+  --shadow-recess: inset 0 1px 10px rgb(0 0 0 / 0.045);
+  --screen-grid:
+    repeating-linear-gradient(to bottom, transparent 0 2px, rgb(0 0 0 / 0.018) 2px 3px),
+    repeating-linear-gradient(to right, rgb(255 250 250) 0 1px, rgb(250 255 250) 1px 2px, rgb(250 250 255) 2px 3px);
+  --shadow-modal: 0 18px 50px rgb(0 0 0 / 0.16);
+  --backdrop-bg: rgb(0 0 0 / 0.45);
+  /* the deep amber of the light theme glows at 70% */
+  --aura: 0 0 12px color-mix(in srgb, var(--primary) 24%, transparent), 0 0 28px color-mix(in srgb, var(--primary) 11%, transparent);
+  --card-aura: 0 0 14px color-mix(in srgb, var(--primary) 6%, transparent), 0 0 32px color-mix(in srgb, var(--primary) 3%, transparent);
+  --cell-glow: none;
   color-scheme: light;
+}
+
+/* the tubes stay dark in the light theme: inside them the dark palette applies */
+[data-theme='light'] .tube {
+  --foreground: #e7e5e2;
+  --muted-foreground: #a19e98;
+  --primary: #f0a04b;
+  --border: #292826;
+  --aura: 0 0 12px rgb(240 160 75 / 0.34), 0 0 28px rgb(240 160 75 / 0.16);
+  --aura-sm: 0 0 8px rgb(240 160 75 / 0.55), 0 0 18px rgb(240 160 75 / 0.22);
+  color-scheme: dark;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
   --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-note: var(--note);
-  --color-tip: var(--tip);
-  --color-warning: var(--warning);
-  --color-danger: var(--danger);
+  --color-tube: var(--surface-tube);
   --radius-sm: calc(var(--radius) - 2px);
   --radius-md: var(--radius);
-  --radius-lg: calc(var(--radius) + 2px);
-  --radius-xl: calc(var(--radius) + 6px);
 }
 
 @theme {
@@ -171,7 +195,56 @@
 }
 
 /* ---------------------------------------------------------------------------
-   Bidirectional sidenote <-> reference highlight (pure CSS, zero JS).
+   Text buttons and nav links (the header, CLOSE in the lightbox and the search,
+   COPY on code blocks): IBM Plex Mono capitals that light up on hover instead of
+   getting a box. COPY is smaller, to fit the code block's bar.
+--------------------------------------------------------------------------- */
+.mono-btn,
+.code-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--muted-foreground);
+  text-shadow: var(--aura-off);
+  cursor: pointer;
+  transition:
+    color 180ms ease,
+    text-shadow var(--lamp-out) var(--lamp-out-ease);
+}
+
+.code-copy {
+  padding: 1px 4px;
+  font-size: 10.5px;
+}
+
+.mono-btn:hover,
+.code-copy:hover,
+.code-block[data-copied] .code-copy {
+  color: var(--foreground);
+  text-shadow: var(--aura);
+  transition-duration: var(--lamp-in);
+  transition-timing-function: ease-out;
+}
+
+/* the page you are on, and the code that was just copied */
+.mono-btn[aria-current='page'] {
+  color: var(--foreground);
+}
+.code-block[data-copied] .code-copy {
+  color: var(--primary);
+}
+
+/* ---------------------------------------------------------------------------
+   Bidirectional sidenote <-> reference highlight (pure CSS, zero JS). With the
+   lamp "mono" effect the brackets light up instead (lamp.css).
 --------------------------------------------------------------------------- */
 .sidenote-ref {
   cursor: default;
@@ -195,10 +268,12 @@
   transition: background-color 150ms ease;
 }
 
-.sidenote-ref:hover,
-.sidenote-ref:has(+ .sidenote:hover),
-.sidenote-ref:hover + .sidenote .sidenote-n,
-.sidenote:hover .sidenote-n {
+html:not(.lamp-mono) :is(
+    .sidenote-ref:hover,
+    .sidenote-ref:has(+ .sidenote:hover),
+    .sidenote-ref:hover + .sidenote .sidenote-n,
+    .sidenote:hover .sidenote-n
+  ) {
   background: color-mix(in srgb, var(--primary) 20%, transparent);
 }
 
@@ -288,6 +363,8 @@ dialog.lightbox[open] {
   }
 }
 
+/* the picture takes over the page: its CLOSE and caption sit right on this veil, so the
+   page must not show through (the search dialog has its own surface and only dims it) */
 dialog.lightbox::backdrop {
   background: color-mix(in srgb, var(--background) 92%, transparent);
   -webkit-backdrop-filter: blur(12px);
@@ -309,6 +386,7 @@ dialog.lightbox[open]::backdrop {
   }
 }
 
+/* in line with the site header: CLOSE takes the place of SEARCH */
 .lightbox-bar {
   position: fixed;
   top: 0;
@@ -322,52 +400,14 @@ dialog.lightbox[open]::backdrop {
   pointer-events: none;
 }
 
-.lightbox-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 2px;
-  border: 0;
-  background: none;
-  font-family: var(--font-mono);
-  font-size: 11.5px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--muted-foreground);
-  cursor: pointer;
+.lightbox-bar .mono-btn {
   pointer-events: auto;
-  transition:
-    color 180ms ease,
-    text-shadow var(--lamp-out, 350ms) var(--lamp-out-ease, ease);
 }
 
-.lightbox-btn:hover {
-  color: var(--foreground);
-  transition:
-    color 120ms ease,
-    text-shadow var(--lamp-in, 120ms) ease-out;
-  text-shadow:
-    0 0 10px rgb(var(--lamp-aura, 240 160 75) / calc(0.28 * var(--lamp-aura-a, 1))),
-    0 0 22px rgb(var(--lamp-aura, 240 160 75) / calc(0.12 * var(--lamp-aura-a, 1)));
-}
-
-.lightbox-close kbd {
-  border: 0;
-  padding: 0;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.02em;
-  color: color-mix(in srgb, var(--muted-foreground) 75%, transparent);
-}
-
-.lightbox-close kbd::before {
-  content: '[';
-  opacity: 0.55;
-}
-
-.lightbox-close kbd::after {
-  content: ']';
-  opacity: 0.55;
+@media (width < 40rem) {
+  .lightbox-bar {
+    padding: 0 16px;
+  }
 }
 
 .lightbox-inner {
@@ -388,18 +428,15 @@ dialog.lightbox[open] .lightbox-inner {
   }
 }
 
-/* Kinescope frame for fullscreen figures, matching code blocks */
+/* the figure behind glass, like a code block or the search: one 1px border, the same
+   corner vignette and recess, the shadow of a modal */
 .lightbox-frame {
   position: relative;
   isolation: isolate;
   overflow: hidden;
   border: 1px solid var(--border);
-  border-radius: 6px;
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.16);
-}
-
-[data-theme='dark'] .lightbox-frame {
-  box-shadow: 0 22px 64px rgba(0, 0, 0, 0.6);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-modal);
 }
 
 /* quiet pixel + scanline grid on SVG diagrams only (keeps raster paintings clean) */
@@ -410,59 +447,17 @@ dialog.lightbox[open] .lightbox-inner {
   z-index: 2;
   pointer-events: none;
   mix-blend-mode: multiply;
-  background-image:
-    repeating-linear-gradient(
-      to bottom,
-      transparent 0 2px,
-      rgb(0 0 0 / 0.018) 2px 3px
-    ),
-    repeating-linear-gradient(
-      to right,
-      rgb(255 250 250) 0 1px,
-      rgb(250 255 250) 1px 2px,
-      rgb(250 250 255) 2px 3px
-    );
+  background-image: var(--screen-grid);
 }
 
-[data-theme='dark'] .lightbox-frame:has(.lightbox-svg)::before {
-  background-image:
-    repeating-linear-gradient(
-      to bottom,
-      transparent 0 2px,
-      rgb(0 0 0 / 0.12) 2px 3px
-    ),
-    repeating-linear-gradient(
-      to right,
-      rgb(255 232 232) 0 1px,
-      rgb(232 255 232) 1px 2px,
-      rgb(232 232 255) 2px 3px
-    );
-}
-
-/* soft glass sheen + tube vignette + recessed inner rim */
 .lightbox-frame::after {
   content: '';
   position: absolute;
   inset: 0;
   z-index: 3;
   pointer-events: none;
-  background:
-    linear-gradient(155deg, rgb(255 255 255 / 0.22) 0%, rgb(255 255 255 / 0.05) 28%, transparent 46%),
-    radial-gradient(ellipse 84% 110% at 50% 45%, transparent 58%, rgb(0 0 0 / 0.05) 100%);
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.45),
-    inset 0 0 0 1px rgb(0 0 0 / 0.05),
-    inset 0 1px 10px rgb(0 0 0 / 0.04);
-}
-
-[data-theme='dark'] .lightbox-frame::after {
-  background:
-    linear-gradient(155deg, rgb(255 255 255 / 0.07) 0%, rgb(255 255 255 / 0.015) 28%, transparent 46%),
-    radial-gradient(ellipse 84% 110% at 50% 45%, transparent 54%, rgb(0 0 0 / 0.24) 100%);
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.09),
-    inset 0 0 0 1px rgb(0 0 0 / 0.26),
-    inset 0 2px 16px rgb(0 0 0 / 0.22);
+  background: var(--vignette-panel);
+  box-shadow: var(--shadow-recess);
 }
 
 .lightbox-img {
@@ -480,11 +475,11 @@ dialog.lightbox[open] .lightbox-inner {
   max-width: calc(90vw - 48px);
   max-height: calc(76dvh - 48px);
   padding: 24px;
-  background-color: #f3f2ef;
+  background-color: var(--surface-screen);
 }
 
-[data-theme='dark'] .lightbox-svg {
-  background-color: #1b1b1a;
+.lightbox-picture {
+  display: block;
 }
 
 .lightbox-caption {
@@ -510,16 +505,17 @@ dialog.lightbox[open] .lightbox-inner {
 }
 
 /* ---------------------------------------------------------------------------
-   Smooth open & close transitions for the search dialog.
+   The search dialog: the shadow of a modal, smooth open & close.
 --------------------------------------------------------------------------- */
 dialog[data-search] {
+  box-shadow: var(--shadow-modal);
   opacity: 0;
   transform: translateY(-6px) scale(0.985);
   transition:
-    opacity 150ms ease,
-    transform 150ms ease,
-    display 150ms allow-discrete,
-    overlay 150ms allow-discrete;
+    opacity 160ms ease,
+    transform 160ms ease,
+    display 160ms allow-discrete,
+    overlay 160ms allow-discrete;
 }
 
 dialog[data-search][open] {
@@ -535,11 +531,12 @@ dialog[data-search][open] {
 }
 
 dialog[data-search]::backdrop {
+  background: var(--backdrop-bg);
   opacity: 0;
   transition:
-    opacity 150ms ease,
-    display 150ms allow-discrete,
-    overlay 150ms allow-discrete;
+    opacity 160ms ease,
+    display 160ms allow-discrete,
+    overlay 160ms allow-discrete;
 }
 
 dialog[data-search][open]::backdrop {

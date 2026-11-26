@@ -14,11 +14,13 @@ npm run check    # проверка типов (astro check + tsc)
 - `STYLE.md` — стилистика сайта: идея, правила, эффекты и где они живут. Читать перед правками внешнего вида.
 
 - `src/content/posts/` — статьи в Markdown, адрес `/blog/<имя-файла>/`. Картинки — в `attachments/`. Папку можно открыть как хранилище Obsidian.
+- `src/content/projects/` — проекты, адрес `/projects/<имя-файла>/`; на главной — карточки над статьями.
 - `src/site.config.ts` — название, описание, меню, флаг светлой темы.
 - `astro.config.mjs` — адрес сайта (`site`) и настройки Markdown.
-- `src/styles/global.css` — палитра (цвета для `bg-background`, `text-primary`, `text-muted-foreground`…) и шрифты.
+- `src/styles/global.css` — токены: палитра (цвета для `bg-background`, `text-primary`, `text-muted-foreground`…), поверхности, тени, свечение, тайминги; шрифты.
+- `src/styles/lamp.css` и `src/scripts/lamp.ts` — «ламповые» эффекты: свечение, кинескоп, дизеринг (см. `STYLE.md`).
 - `src/styles/markdown-classes.mjs` — Tailwind-классы для текста статей: какой класс получает каждый `h2`, `p`, ссылка, выноска, сноска.
-- `src/components/` — вёрстка на Tailwind-классах: шаблон статьи, оглавление, списки, шапка страниц.
+- `src/components/` — вёрстка на Tailwind-классах: шаблон статьи и проекта, карточки главной, оглавление, поиск, шапка страниц.
 - `src/layouts/Base.astro` — каркас страницы: шапка с меню, поиск, тема.
 - `src/pages/index.astro` — текст на главной.
 - `src/lib/markdown-plugins.mjs` — `[[ссылки]]`, сноски на полях, выноски, формулы, шапка у кода.

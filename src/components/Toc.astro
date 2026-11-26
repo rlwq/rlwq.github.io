@@ -1,6 +1,6 @@
 ---
 import type { MarkdownHeading } from 'astro';
-import { plural } from '../lib/posts';
+import { plural, tocAttrs } from '../lib/posts';
 
 interface Props {
   headings: MarkdownHeading[];
@@ -12,14 +12,6 @@ const { headings, variant } = Astro.props;
 const item = (depth: number) => (depth === 3 ? 'mb-2 pl-3 text-[12.5px]' : 'mb-2');
 const link =
   '-ml-3 block border-l-2 border-transparent pl-2.5 text-muted-foreground transition-colors hover:text-foreground data-active:border-primary data-active:text-primary';
-// For styling hooks: depth of each entry, and whether a sub-entry is the last of its group
-// (so a tree view can draw ├─ or └─).
-const branch = (i: number) =>
-  headings[i].depth === 3 ? (headings[i + 1]?.depth === 3 ? 'mid' : 'last') : undefined;
-// a section whose sub-sections follow it: the tree hangs off its number
-const parent = (i: number) => (headings[i].depth === 2 && headings[i + 1]?.depth === 3 ? '' : undefined);
-// the first sub-entry under a section: its trunk starts at the section's rule
-const first = (i: number) => (headings[i].depth === 3 && headings[i - 1]?.depth === 2 ? '' : undefined);
 ---
 
 {
@@ -30,7 +22,7 @@ const first = (i: number) => (headings[i].depth === 3 && headings[i - 1]?.depth 
         <ol class="font-sans text-[13px] leading-[19px]">
           {headings.map((h, i) => (
             <li class={item(h.depth)} data-depth={h.depth}>
-              <a class={link} href={`#${h.slug}`} data-branch={branch(i)} data-parent={parent(i)} data-first={first(i)}>
+              <a class={link} href={`#${h.slug}`} {...tocAttrs(headings, i)}>
                 {h.text}
               </a>
             </li>
@@ -45,10 +37,10 @@ const first = (i: number) => (headings[i].depth === 3 && headings[i - 1]?.depth 
         <span class="toc-fold-count ml-auto">{plural(headings.filter((h) => h.depth === 2).length, 'section')}</span>
         <span class="toc-fold-sign" aria-hidden="true"></span>
       </summary>
-      <ol class="toc-fold-screen relative py-3 pr-4 pl-7 font-sans text-[13px] leading-[19px]">
+      <ol class="toc-fold-screen relative py-3 pr-4 pl-7 font-sans text-[13px] leading-[19px]" data-glare>
         {headings.map((h, i) => (
           <li class={item(h.depth)} data-depth={h.depth}>
-            <a class={link} href={`#${h.slug}`} data-branch={branch(i)} data-parent={parent(i)} data-first={first(i)}>
+            <a class={link} href={`#${h.slug}`} {...tocAttrs(headings, i)}>
               {h.text}
             </a>
           </li>

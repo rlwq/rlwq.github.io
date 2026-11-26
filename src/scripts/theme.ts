@@ -6,7 +6,7 @@ const themeColor = document.querySelector<HTMLMetaElement>('meta[name="theme-col
 function sync() {
   const dark = root.dataset.theme === 'dark';
   if (button) button.textContent = dark ? 'Light' : 'Dark';
-  if (themeColor) themeColor.content = dark ? '#161616' : '#fafaf9';
+  if (themeColor) themeColor.content = dark ? '#121212' : '#fafaf9';
 }
 
 button?.addEventListener('click', () => {

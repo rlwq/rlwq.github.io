@@ -7,6 +7,7 @@ import { z } from 'astro/zod';
 import { slugFromFile } from './lib/note-index.mjs';
 
 const postsDir = path.resolve('./src/content/posts');
+const projectsDir = path.resolve('./src/content/projects');
 
 /** Fingerprint of every SVG under the posts folder (names and contents). */
 function svgFingerprint(dir: string) {
@@ -31,11 +32,11 @@ function svgFingerprint(dir: string) {
 // 2. SVG-схемы вшиваются в статью при отрисовке (inlineSvg), а Astro перерисовывает статью,
 //    только когда меняется её собственный текст. Поэтому в хэш статьи подмешивается отпечаток
 //    всех SVG из папки статей: поправил схему — статья перерисуется, и в сборке, и в dev сразу.
-function prepare(loader: Loader): Loader {
+function prepare(loader: Loader, dir: string): Loader {
   return {
     ...loader,
     load: async (context) => {
-      let svgs = svgFingerprint(postsDir);
+      let svgs = svgFingerprint(dir);
       const run = async (watcher: typeof context.watcher) => {
         await loader.load({
           ...context,
@@ -49,10 +50,10 @@ function prepare(loader: Loader): Loader {
       await run(context.watcher);
       // dev: a changed SVG re-syncs the collection (without adding more watchers)
       const onSvg = async (file: string) => {
-        if (!file.toLowerCase().endsWith('.svg') || !path.resolve(file).startsWith(postsDir)) return;
-        svgs = svgFingerprint(postsDir);
+        if (!file.toLowerCase().endsWith('.svg') || !path.resolve(file).startsWith(dir)) return;
+        svgs = svgFingerprint(dir);
         await run(undefined);
-        context.logger.info(`Re-rendered posts after a change to ${path.basename(file)}`);
+        context.logger.info(`Re-rendered collection after a change to ${path.basename(file)}`);
       };
       for (const ev of ['change', 'add', 'unlink'] as const) context.watcher?.on(ev, onSvg);
     },
@@ -69,6 +70,7 @@ const posts = defineCollection({
       // статью можно переложить в другую папку, и ссылка не сломается.
       generateId: ({ entry, data }) => slugFromFile(entry, data),
     }),
+    postsDir,
   ),
   schema: ({ image }) =>
     z.object({
@@ -90,4 +92,30 @@ const posts = defineCollection({
     }),
 });
 
-export const collections = { posts };
+// Проекты: src/content/projects/*.md -> /projects/<имя-файла>/
+const projects = defineCollection({
+  loader: prepare(
+    glob({
+      pattern: '**/*.{md,mdx}',
+      base: './src/content/projects',
+      generateId: ({ entry, data }) => slugFromFile(entry, data),
+    }),
+    projectsDir,
+  ),
+  schema: ({ image }) =>
+    z.object({
+      title: z.string(),
+      description: z.string(),
+      year: z.coerce.string(),
+      url: z.url().optional(),
+      repo: z.url().optional(),
+      caption: z.string().optional(),
+      tags: z.array(z.string()).default([]),
+      order: z.number().default(100),
+      draft: z.boolean().default(false),
+      cover: image().optional(),
+      coverPosition: z.enum(['top', 'center', 'bottom']).default('center'),
+    }),
+});
+
+export const collections = { posts, projects };

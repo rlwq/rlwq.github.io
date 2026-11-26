@@ -43,13 +43,12 @@ export default {
   '.code-bar': 'order-first flex min-h-8 items-center justify-between gap-3 border-b pr-1.5 pl-4 font-sans text-xs text-muted-foreground',
   '.code-label': 'font-mono text-xs',
   '.code-title': 'font-mono text-xs text-foreground',
-  '.code-copy': 'cursor-pointer rounded-[3px] px-2 py-0.5 font-sans text-xs text-muted-foreground hover:bg-foreground/10 hover:text-foreground',
 
   // ---- Callouts: > [!note], > [!tip], > [!warning], > [!danger] ---------
   '.callout': 'mb-6 rounded-r-md border-l-[3px] border-(--c) bg-(--c)/8 px-[18px] py-3.5 text-[17px] leading-7 [&>:last-child]:mb-0',
   '.callout-note': '[--c:var(--note)]',
   '.callout-tip': '[--c:var(--tip)]',
-  '.callout-warning': '[--c:var(--warning)]',
+  '.callout-warning': '[--c:var(--primary)]',
   '.callout-danger': '[--c:var(--danger)]',
   '.callout-quote': '[--c:var(--muted-foreground)] italic',
   '.callout-title': 'mt-0 mb-1 font-sans text-[13px] leading-5 font-semibold not-italic text-(--c)',

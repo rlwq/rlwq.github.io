@@ -4,7 +4,7 @@ import { render } from 'astro:content';
 import Column from './Column.astro';
 import PageHeader from './PageHeader.astro';
 import Toc from './Toc.astro';
-import { getGraph, postUrl, readingMinutes, type Post } from '../lib/posts';
+import { getGraph, isoDay, postUrl, readingMinutes, type Post } from '../lib/posts';
 
 interface Props {
   post: Post;
@@ -20,10 +20,8 @@ const minutes = readingMinutes(post.body ?? '');
 const { backlinks: allBacklinks } = await getGraph();
 const backlinks = allBacklinks.get(post.id) ?? [];
 
-// Dates in the header read like an instrument log: 2026-11-19
-const isoDay = (d: Date) => d.toISOString().slice(0, 10);
-
-const label = 'mb-3 font-sans text-[13px] leading-5 font-medium text-muted-foreground';
+// the same small label as ABOUT, PROJECTS and ARTICLES on the home page
+const label = 'mb-3 font-mono text-[11.5px] tracking-[0.06em] text-muted-foreground uppercase';
 ---
 
 <Column as="article">
@@ -62,7 +60,7 @@ const label = 'mb-3 font-sans text-[13px] leading-5 font-medium text-muted-foreg
           <ul class="grid gap-2.5">
             {backlinks.map(({ post: from, context }) => (
               <li>
-                <a class="block rounded-sm border px-3.5 py-3 transition-colors hover:bg-muted" href={postUrl(from.id)}>
+                <a class="block rounded-md border px-3.5 py-3 transition-colors hover:bg-muted" href={postUrl(from.id)}>
                   <span class="mb-1 block font-sans text-[13px] leading-[18px] font-semibold">{from.data.title}</span>
                   {context && <span class="block text-sm leading-[22px] text-muted-foreground">{context}</span>}
                 </a>

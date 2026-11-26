@@ -1,12 +1,17 @@
 ---
 import Base from '../layouts/Base.astro';
 import ArticleCards from '../components/ArticleCards.astro';
+import ProjectCards from '../components/ProjectCards.astro';
 import { getPosts, plural } from '../lib/posts';
+import { getProjects } from '../lib/projects';
+import { site } from '../site.config';
 
 const posts = await getPosts();
+const projects = await getProjects();
 ---
 
 <Base>
+  <h1 class="sr-only">{site.title}</h1>
   <div class="relative min-h-[calc(100svh-48px)]">
     <div class="mx-auto max-w-[1100px] px-8 pt-10 pb-24 max-sm:px-4 max-sm:pt-8">
       <div class="flex flex-col gap-12 lg:flex-row lg:items-start lg:gap-0">
@@ -35,20 +40,36 @@ const posts = await getPosts();
           </ul>
         </aside>
 
-        <section class="min-w-0 flex-1 lg:pl-10" data-home-articles aria-labelledby="home-articles-label">
-          <div class="mb-5 flex items-baseline justify-between gap-4">
-            <h1 id="home-articles-label" class="font-mono text-[11.5px] tracking-[0.06em] text-muted-foreground uppercase">
-              Articles
-            </h1>
-            <span class="font-mono text-[11.5px] tracking-[0.06em] text-muted-foreground uppercase">
-              {plural(posts.length, 'article')}
-            </span>
-          </div>
+        <div class="min-w-0 flex-1 space-y-12 lg:pl-10">
+          <section data-home-projects aria-labelledby="home-projects-label">
+            <div class="mb-5 flex items-baseline justify-between gap-4">
+              <h2 id="home-projects-label" class="font-mono text-[11.5px] tracking-[0.06em] text-muted-foreground uppercase">
+                Projects
+              </h2>
+              <span class="font-mono text-[11.5px] tracking-[0.06em] text-muted-foreground uppercase">
+                {plural(projects.length, 'project')}
+              </span>
+            </div>
 
-          <ArticleCards posts={posts} />
-        </section>
+            <ProjectCards projects={projects} />
+          </section>
+
+          <section data-home-articles aria-labelledby="home-articles-label">
+            <div class="mb-5 flex items-baseline justify-between gap-4">
+              <h2 id="home-articles-label" class="font-mono text-[11.5px] tracking-[0.06em] text-muted-foreground uppercase">
+                Articles
+              </h2>
+              <span class="font-mono text-[11.5px] tracking-[0.06em] text-muted-foreground uppercase">
+                {plural(posts.length, 'article')}
+              </span>
+            </div>
+
+            <ArticleCards posts={posts} />
+          </section>
+        </div>
       </div>
     </div>
+
     <!-- quiet on purpose: not a contact, just the feed, tucked into the bottom-left corner
          of the page, in line with HOME in the header -->
     <a

@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 740 226" width="740" height="226" role="img" aria-label="How one wording change spreads across 54 publications">
+  <defs>
+    <filter id="fhGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="2.6" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <marker id="fhArr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto">
+      <path d="M 1 1.5 L 9 5 L 1 8.5 z" class="fh-arr"/>
+    </marker>
+    <marker id="fhArrHot" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto">
+      <path d="M 1 1.5 L 9 5 L 1 8.5 z" class="fh-arr-hot"/>
+    </marker>
+    <style>
+      .fh-box     { fill: var(--muted, #1a1a19); stroke: var(--border, #292826); stroke-width: 1; }
+      .fh-box-hot { fill: var(--muted, #1a1a19); stroke: var(--primary, #f0a04b); stroke-width: 1; }
+      .fh-div     { stroke: var(--border, #292826); stroke-width: 1; }
+      .fh-edge    { fill: none; stroke: var(--muted-foreground, #a19e98); stroke-width: 1; opacity: 0.55; }
+      .fh-edge-h  { fill: none; stroke: var(--primary, #f0a04b); stroke-width: 1; opacity: 0.85; }
+      .fh-arr     { fill: var(--muted-foreground, #a19e98); opacity: 0.55; }
+      .fh-arr-hot { fill: var(--primary, #f0a04b); opacity: 0.85; }
+      .fh-meta    { font: 400 10px var(--font-mono, 'IBM Plex Mono', ui-monospace, monospace); letter-spacing: 0.06em; fill: var(--muted-foreground, #a19e98); }
+      .fh-tag     { font: 500 10px var(--font-mono, 'IBM Plex Mono', ui-monospace, monospace); letter-spacing: 0.06em; fill: var(--primary, #f0a04b); }
+      .fh-title   { font: 500 12.5px var(--font-mono, 'IBM Plex Mono', ui-monospace, monospace); fill: var(--foreground, #e7e5e2); }
+      .fh-quote   { font: 400 11.5px var(--font-mono, 'IBM Plex Mono', ui-monospace, monospace); fill: var(--muted-foreground, #a19e98); }
+      .fh-hl      { font: 500 11.5px var(--font-mono, 'IBM Plex Mono', ui-monospace, monospace); fill: var(--primary, #f0a04b); }
+      .fh-foot    { font: 400 10.5px var(--font-mono, 'IBM Plex Mono', ui-monospace, monospace); letter-spacing: 0.06em; fill: var(--muted-foreground, #a19e98); text-anchor: middle; }
+    </style>
+  </defs>
+
+  <!-- Step 1 -> Step 2 (top row) -->
+  <line x1="330.5" y1="60.5" x2="399.5" y2="60.5" class="fh-edge" marker-end="url(#fhArr)"/>
+  <text x="365" y="51" class="fh-meta" text-anchor="middle">COPIED</text>
+
+  <!-- Step 1 -> Step 3 (branch where wording mutates) -->
+  <path d="M 171.5 104.5 L 171.5 129.5" class="fh-edge-h" marker-end="url(#fhArrHot)"/>
+  <text x="181" y="121" class="fh-tag">REWORDED</text>
+
+  <!-- Step 3 -> Step 4 (bottom row) -->
+  <line x1="330.5" y1="173.5" x2="399.5" y2="173.5" class="fh-edge" marker-end="url(#fhArr)"/>
+  <text x="365" y="164" class="fh-meta" text-anchor="middle">REPEATED</text>
+
+  <!-- Node 1: Earliest found (glowing amber frame) -->
+  <g>
+    <rect x="12.5" y="16.5" width="318" height="88" rx="3" class="fh-box-hot" filter="url(#fhGlow)"/>
+    <rect x="24" y="29" width="4" height="4" fill="var(--primary, #f0a04b)" filter="url(#fhGlow)"/>
+    <text x="34" y="34" class="fh-tag">EARLIEST FOUND · NOV 2, 08:14</text>
+    <line x1="24" y1="43.5" x2="318" y2="43.5" class="fh-div"/>
+    <text x="24" y="61" class="fh-title">Ministry page</text>
+    <text x="24" y="81" class="fh-quote">"Ministry may cut administrative bonuses"</text>
+  </g>
+
+  <!-- Node 2: Daily Wire (+19 sites) -->
+  <g>
+    <rect x="406.5" y="16.5" width="321" height="88" rx="3" class="fh-box"/>
+    <text x="418" y="34" class="fh-meta">SAME WORDING · 20 SITES · NOV 2, 10:05</text>
+    <line x1="418" y1="43.5" x2="715" y2="43.5" class="fh-div"/>
+    <text x="418" y="61" class="fh-title">Daily Wire (+19 sites)</text>
+    <text x="418" y="81" class="fh-quote">"Ministry may cut administrative bonuses"</text>
+  </g>
+
+  <!-- Node 3: Pulse Online (mutation point) -->
+  <g>
+    <rect x="12.5" y="135.5" width="318" height="76" rx="3" class="fh-box-hot" filter="url(#fhGlow)"/>
+    <rect x="24" y="148" width="4" height="4" fill="var(--primary, #f0a04b)" filter="url(#fhGlow)"/>
+    <text x="34" y="153" class="fh-tag">WORDING CHANGES HERE · NOV 4, 11:40</text>
+    <line x1="24" y1="162.5" x2="318" y2="162.5" class="fh-div"/>
+    <text x="24" y="180" class="fh-title">Pulse Online</text>
+    <text x="24" y="198" class="fh-hl">"Ministry will cut teachers' salaries"</text>
+  </g>
+
+  <!-- Node 4: City Herald (+31 sites) -->
+  <g>
+    <rect x="406.5" y="135.5" width="321" height="76" rx="3" class="fh-box"/>
+    <text x="418" y="153" class="fh-meta">REPEATED BY 32 SITES · NOV 4, 13:12</text>
+    <line x1="418" y1="162.5" x2="715" y2="162.5" class="fh-div"/>
+    <text x="418" y="180" class="fh-title">City Herald (+31 sites)</text>
+    <text x="418" y="198" class="fh-quote">"Ministry will cut teachers' salaries"</text>
+  </g>
+
+</svg>

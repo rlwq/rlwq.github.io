@@ -27,7 +27,7 @@ if (article) {
 
     const close = document.createElement('button');
     close.type = 'button';
-    close.className = 'lightbox-btn lightbox-close';
+    close.className = 'mono-btn';
     close.setAttribute('aria-label', 'Close');
     close.innerHTML = 'Close <kbd>Esc</kbd>';
     close.addEventListener('click', () => dlg.close());
@@ -55,7 +55,8 @@ if (article) {
       const scale = Math.min((window.innerWidth * 0.88) / natW, (window.innerHeight * 0.76) / natH, 2.4);
       svg.style.width = `${Math.round(natW * scale)}px`;
       svg.style.height = `${Math.round(natH * scale)}px`;
-      svg.classList.add('lightbox-svg');
+      // data-picture: an SVG that is a picture (an app screen), not a diagram: shown like a raster, without the grid
+      svg.classList.add(target.hasAttribute('data-picture') ? 'lightbox-picture' : 'lightbox-svg');
       frame.appendChild(svg);
     }
 

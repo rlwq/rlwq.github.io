@@ -2,36 +2,40 @@
    The "lamp" layer: a warm analog look built from real display and print
    artifacts (phosphor glow, CRT, dithering, terminal type). Each effect hangs
    off an html.lamp-<feature> class set in Base.astro, so one can be switched
-   off by removing its class there.
+   off by removing its class there. Colours, depth, glows and timings are the
+   tokens in global.css; this file only decides where they go.
+
+   Lit states share one pattern: the unlit state carries the same layers at
+   zero (--aura-off) and goes out over --lamp-out; the lit state comes on over
+   --lamp-in, ease-out.
 --------------------------------------------------------------------------- */
 
 /* ---- glow: a soft aura on accent links, in both themes ----------------------
-   Only wide, diffuse layers — no tight "core" hugging the letters (that is what made
-   the glyphs look bold and smeared, like a neon sign). The letters keep their colour
-   and stay crisp; the light around them fades in. Links never dim on hover.
-   The aura takes the accent of the current theme (amber on dark, deep amber on light). */
-html.lamp-glow {
-  --lamp-aura: 240 160 75;
-  --lamp-aura-a: 1;
-}
-html.lamp-glow[data-theme='light'] {
-  --lamp-aura: 180 83 9;
-  --lamp-aura-a: 0.7;
-}
+   The letters keep their colour and stay crisp; only the light around them
+   fades in. Links never dim on hover. */
 html.lamp-glow main a:is(.text-primary, [class*='text-primary']) {
-  text-shadow:
-    0 0 12px rgb(var(--lamp-aura) / 0),
-    0 0 28px rgb(var(--lamp-aura) / 0);
-  transition: text-shadow var(--lamp-out, 350ms) var(--lamp-out-ease, ease);
+  text-shadow: var(--aura-off);
+  transition: text-shadow var(--lamp-out) var(--lamp-out-ease);
 }
 html.lamp-glow main a:is(.text-primary, [class*='text-primary']):hover {
   opacity: 1;
-  transition: text-shadow var(--lamp-in, 350ms) ease-out;
-  text-shadow:
-    0 0 12px rgb(var(--lamp-aura) / calc(0.34 * var(--lamp-aura-a))),
-    0 0 28px rgb(var(--lamp-aura) / calc(0.16 * var(--lamp-aura-a)));
+  text-shadow: var(--aura);
+  transition-duration: var(--lamp-in);
+  transition-timing-function: ease-out;
 }
-/* card titles stay as they are on hover: no colour change, no aura */
+/* a hovered card lights its frame, not its title: a quiet amber border and halo */
+html.lamp-glow .card-shell {
+  box-shadow: var(--card-aura-off);
+  transition:
+    border-color var(--lamp-out) var(--lamp-out-ease),
+    box-shadow var(--lamp-out) var(--lamp-out-ease);
+}
+html.lamp-glow .card-item:hover > .card-shell {
+  border-color: color-mix(in srgb, var(--primary) 34%, var(--border));
+  box-shadow: var(--card-aura);
+  transition-duration: var(--lamp-in);
+  transition-timing-function: ease-out;
+}
 
 /* ---- grain: static film grain over the whole page ------------------------- */
 html.lamp-grain body::after {
@@ -63,7 +67,10 @@ html.lamp-type abbr {
   text-decoration: none;
 }
 
-/* ---- mono: IBM Plex Mono for code, and footnotes styled to match ---------- */
+/* ---- mono: IBM Plex Mono for code, and footnotes styled to match ----------
+   Footnote numbers read [3], with no box behind them (it looked like a button).
+   Hovering a reference or its note shows which belongs to which: the brackets
+   light up and the number gets the aura of links. */
 html.lamp-mono {
   --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 }
@@ -71,34 +78,26 @@ html.lamp-mono :is(.sidenote-ref, .sidenote-n) {
   font-family: var(--font-mono);
   font-weight: 500;
   letter-spacing: -0.02em;
+  text-shadow: var(--aura-off);
+  transition: text-shadow var(--lamp-out) var(--lamp-out-ease);
 }
-html.lamp-mono .sidenote-ref::before,
-html.lamp-mono .sidenote-n::before {
+html.lamp-mono :is(.sidenote-ref, .sidenote-n)::before {
   content: '[';
   opacity: 0.55;
 }
-html.lamp-mono .sidenote-ref::after,
-html.lamp-mono .sidenote-n::after {
+html.lamp-mono :is(.sidenote-ref, .sidenote-n)::after {
   content: ']';
   opacity: 0.55;
 }
-/* no background box behind [n] — not even on hover (it looked like a button) */
-html.lamp-mono :is(.sidenote-ref, .sidenote-n) {
-  background: none !important;
-  transition: text-shadow var(--lamp-out, 350ms) var(--lamp-out-ease, ease);
-}
-/* hovering a reference or its note still shows which belongs to which: the brackets
-   light up and the number gets the same soft aura as links */
 html.lamp-mono :is(
     .sidenote-ref:hover,
     .sidenote-ref:has(+ .sidenote:hover),
     .sidenote-ref:hover + .sidenote .sidenote-n,
     .sidenote:hover .sidenote-n
   ) {
-  transition: text-shadow var(--lamp-in, 350ms) ease-out;
-  text-shadow:
-    0 0 10px rgb(var(--lamp-aura, 240 160 75) / 0.35),
-    0 0 22px rgb(var(--lamp-aura, 240 160 75) / 0.15);
+  text-shadow: var(--aura);
+  transition-duration: var(--lamp-in);
+  transition-timing-function: ease-out;
 }
 html.lamp-mono :is(
     .sidenote-ref:hover,
@@ -126,14 +125,10 @@ html.lamp-ui main hr {
   border: 0;
   height: 4px;
 }
-html.lamp-ui main blockquote,
-html.lamp-ui .sidenote,
-html.lamp-ui ul.grid article nav {
+html.lamp-ui .sidenote {
   border-color: transparent;
 }
-html.lamp-ui main .code-bar,
-html.lamp-ui main thead th,
-html.lamp-ui main tbody td {
+html.lamp-ui main :is(.code-bar, thead th, tbody td) {
   border-bottom: 0;
 }
 html.lamp-ui [data-lamp-line] {
@@ -158,9 +153,7 @@ html.lamp-tape::-webkit-scrollbar {
   width: 0;
   pointer-events: none;
   background: repeating-linear-gradient(to right, var(--primary) 0 6px, transparent 6px 8px);
-}
-html.lamp-glow[data-theme='dark'] .lamp-tape-bar {
-  filter: drop-shadow(0 0 3px rgba(240, 160, 75, 0.6));
+  filter: var(--cell-glow);
 }
 
 /* ---- caret: blinking block caret in the search field ---------------------- */
@@ -181,67 +174,119 @@ html.lamp-caret [data-search-input] {
   }
 }
 
-/* ---- hover: sync distortion on the CRT cover — painted on its canvas by lamp.ts ---- */
-
-
 /* ---- afterglow: phosphor persistence — light comes on fast, dies slowly ---------
-   Feeds the transition timing of every glow above and of the CRT cover brightness. */
+   Slows down the going-out half of every glow (--lamp-out, see global.css). */
 html.lamp-afterglow {
-  --lamp-in: 120ms;
   --lamp-out: 1300ms;
   --lamp-out-ease: cubic-bezier(0.15, 0.6, 0.3, 1);
 }
-html.lamp-afterglow [data-post-cards] .card-crt {
-  transition: opacity var(--lamp-out) var(--lamp-out-ease);
+
+/* ---- the indicator pixel (LED): one look everywhere ------------------------------
+   A 4×4 square, 7px before its text, in the accent (in a callout: in its ink),
+   glowing in its own colour. It brightens while the thing it marks is hovered,
+   open, copied or current. */
+html.lamp-meta :is(main article > header [data-tag], .card-tag, .project-tag, .home-link),
+html.lamp-grille :is(.code-bar > :is(.code-label, .code-title):not(:empty), .search-tag),
+html.lamp-toc details[data-toc-fold] .toc-fold-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
 }
-html.lamp-afterglow [data-post-cards] .has-crt:hover .card-crt {
+html.lamp-meta :is(main article > header [data-tag], .card-tag, .project-tag, .home-link, main .callout-title)::before,
+html.lamp-meta [data-site-header] nav a::before,
+html.lamp-grille :is(.code-bar > :is(.code-label, .code-title):not(:empty), .search-tag)::before,
+html.lamp-grille .search-dot,
+html.lamp-toc details[data-toc-fold] .toc-fold-label::before {
+  content: '';
+  width: 4px;
+  height: 4px;
+  flex: none;
+  color: var(--primary);
+  background: currentColor;
+  box-shadow: var(--led-idle);
+  transition:
+    color 180ms ease,
+    box-shadow var(--lamp-out) var(--lamp-out-ease);
+}
+html.lamp-meta :is(main article > header [data-tag], .card-tag, .home-link):hover::before,
+html.lamp-meta [data-site-header] nav a[aria-current='page']::before,
+html.lamp-grille .code-block[data-copied] .code-bar > :is(.code-label, .code-title):not(:empty)::before,
+html.lamp-toc details[data-toc-fold][open] .toc-fold-label::before {
+  box-shadow: var(--led-active);
   transition-duration: var(--lamp-in);
+  transition-timing-function: ease-out;
+}
+/* in the site header the pixel is lit only on the page you are on */
+html.lamp-meta [data-site-header] nav a:not([aria-current='page'])::before {
+  color: color-mix(in srgb, var(--muted-foreground) 32%, transparent);
+  box-shadow: none;
+}
+html.lamp-meta [data-site-header] nav a:not([aria-current='page']):hover::before {
+  color: color-mix(in srgb, var(--muted-foreground) 65%, transparent);
+}
+html.lamp-meta main .callout .callout-title::before {
+  color: var(--c, var(--primary));
 }
 
-/* ---- vignette: curved CRT glass on article cards & separate TOC mini-monitors
-   (corner darkening, glass sheen, recessed inner bezel) — sits above content. ---- */
-html.lamp-vignette [data-post-cards] article::after,
-html.lamp-vignette [data-post-cards] .card-toc-monitor::after {
+/* ---- glare: the lamp's light caught by the glass -----------------------------------
+   One source, top left (130°). lamp.ts paints a 4-shade Bayer dither of it per
+   element, under the content, on every glass that holds text: code blocks, the
+   fold-out contents, the search screen ([data-glare]) and the text halves of the
+   home cards (.tube[data-glare]). Pictures — covers, figures, the lightbox — and
+   inline code chips stay clear. */
+html.lamp-glare :is([data-glare], .code-block pre) {
+  background-size: var(--glare-size, auto), 100% 100%;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+}
+
+/* ---- vignette: the home cards as CRT tubes behind curved glass ---------------------
+   Every half of a card is a tube (.tube, bg-tube): the article's CRT cover and its
+   contents monitor, the project's cover and its panel. One surface and one glass over
+   the content (corner vignette + deep recess), so both kinds of card read as one
+   family. The halves with text get the glare under it. */
+html.lamp-vignette .tube::after {
   content: '';
   position: absolute;
   inset: 0;
   z-index: 25;
-  border-radius: inherit;
   pointer-events: none;
-  background:
-    linear-gradient(155deg, rgb(255 255 255 / 0.06) 0%, rgb(255 255 255 / 0.015) 26%, transparent 46%),
-    radial-gradient(ellipse 80% 112% at 50% 44%, transparent 50%, rgb(0 0 0 / 0.32) 100%);
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.08),
-    inset 0 0 0 1px rgb(0 0 0 / 0.3),
-    inset 0 2px 18px rgb(0 0 0 / 0.24);
+  background: var(--vignette-tube);
+  box-shadow: var(--shadow-tube);
 }
-html.lamp-vignette[data-theme='light'] [data-post-cards] article:not(.has-crt)::after {
-  background:
-    linear-gradient(155deg, rgb(255 255 255 / 0.4) 0%, rgb(255 255 255 / 0.09) 26%, transparent 46%),
-    radial-gradient(ellipse 82% 112% at 50% 44%, transparent 56%, rgb(0 0 0 / 0.06) 100%);
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.65),
-    inset 0 0 0 1px rgb(0 0 0 / 0.05),
-    inset 0 1px 12px rgb(0 0 0 / 0.05);
-}
-html.lamp-vignette [data-post-cards] article.has-crt::after,
-html.lamp-vignette [data-post-cards] .card-toc-monitor::after {
-  background:
-    linear-gradient(155deg, rgb(255 255 255 / 0.085) 0%, rgb(255 255 255 / 0.02) 26%, transparent 46%),
-    radial-gradient(ellipse 78% 112% at 50% 44%, transparent 46%, rgb(0 0 0 / 0.52) 100%);
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.12),
-    inset 0 0 0 1px rgb(0 0 0 / 0.45),
-    inset 0 0 26px rgb(0 0 0 / 0.36);
+html.lamp-glare .tube[data-glare] {
+  background-image: var(--glare-img, none);
 }
 
-/* ---- grille: 4-layer CRT code block:
-   1. recessed glass surface + corner vignette (<pre>)
+/* ---- screens: the glass set into the reading column --------------------------------
+   Code blocks, the search screen and the fold-out contents are one kind of screen:
+   the same surface, the glare over a corner vignette, the same recess, and a quiet
+   pixel + scanline grid over the content (so the phosphor glow repeats the pixels).
+   Each has a bezel bar on top with a dithered line under it. The lightbox frame is
+   this glass too, around a picture (global.css). */
+html.lamp-grille :is(.code-block pre, .search-screen),
+html.lamp-toc details[data-toc-fold] .toc-fold-screen {
+  background-color: var(--surface-screen);
+  background-image: var(--glare-img, none), var(--vignette-panel);
+  box-shadow: var(--shadow-recess);
+}
+html.lamp-grille :is(.code-block, .search-screen)::before,
+html.lamp-toc details[data-toc-fold] .toc-fold-screen::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+  background-image: var(--screen-grid);
+}
+
+/* ---- grille: the code block as a CRT screen, four layers:
+   1. the screen (pre): surface, glare, corner vignette, recess — see "screens"
    2. crisp selectable neon text (pre > code, z-index: 1)
-   3. soft phosphor halo with afterglow on hover (code.code-glow, z-index: 2)
-   4. quiet pixel + scanline grid over both text and halo (.code-block::before, z-index: 3)
-   .code-bar sits at z-index: 4 above all screen layers as an instrument bezel. -- */
+   3. a soft phosphor halo of the text (code.code-glow, z-index: 2)
+   4. the pixel + scanline grid over text and halo (::before, z-index: 3)
+   The bar (.code-bar, z-index: 4) is the bezel above all of them. ------------------ */
 html.lamp-grille .code-block {
   position: relative;
   isolation: isolate;
@@ -252,78 +297,14 @@ html.lamp-grille .code-bar {
   min-height: 25px;
   padding: 2px 8px 3px 12px;
   background-color: var(--muted);
-  border-radius: 5px 5px 0 0;
 }
-/* glowing amber indicator pixel before the language / file name, matching lamp-meta */
-html.lamp-grille .code-bar > :is(.code-label, .code-title):not(:empty) {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-}
-html.lamp-grille .code-bar > :is(.code-label, .code-title):not(:empty)::before {
-  content: '';
-  width: 4px;
-  height: 4px;
-  flex: none;
-  background: var(--primary);
-  box-shadow: 0 0 4px rgb(var(--lamp-aura, 240 160 75) / 0.65);
-  transition: box-shadow var(--lamp-out, 350ms) var(--lamp-out-ease, ease);
-}
-html.lamp-grille .code-block[data-copied] .code-bar > :is(.code-label, .code-title):not(:empty)::before {
-  transition-duration: var(--lamp-in, 120ms);
-  box-shadow:
-    0 0 5px rgb(var(--lamp-aura, 240 160 75) / 0.9),
-    0 0 12px rgb(var(--lamp-aura, 240 160 75) / 0.5);
-}
-/* COPY button in IBM Plex Mono uppercase, soft glow on hover instead of a gray box */
-html.lamp-grille .code-copy {
-  padding: 1px 4px;
-  font-family: var(--font-mono);
-  font-size: 10.5px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  background: none !important;
-  transition:
-    color 180ms ease,
-    text-shadow var(--lamp-out, 350ms) var(--lamp-out-ease, ease);
-}
-html.lamp-grille .code-copy:hover,
-html.lamp-grille .code-block[data-copied] .code-copy {
-  color: var(--primary);
-  transition:
-    color 120ms ease,
-    text-shadow var(--lamp-in, 120ms) ease-out;
-  text-shadow:
-    0 0 10px rgb(var(--lamp-aura, 240 160 75) / calc(0.4 * var(--lamp-aura-a, 1))),
-    0 0 22px rgb(var(--lamp-aura, 240 160 75) / calc(0.18 * var(--lamp-aura-a, 1)));
-}
-/* Layer 1: recessed tube surface + soft corner vignette + inner bezel rim */
 html.lamp-grille .code-block pre {
   position: relative;
-  border-radius: 0 0 5px 5px;
-  background-color: #1b1b1a;
-  background-image:
-    radial-gradient(ellipse 84% 110% at 50% 45%, transparent 52%, rgb(0 0 0 / 0.24) 100%),
-    radial-gradient(ellipse 90% 90% at 50% 0%, rgb(255 255 255 / 0.03) 0%, transparent 60%);
-  box-shadow:
-    inset 0 0 0 1px rgb(0 0 0 / 0.24),
-    inset 0 2px 14px rgb(0 0 0 / 0.22);
 }
-html.lamp-grille[data-theme='light'] .code-block pre {
-  background-color: #f3f2ef;
-  background-image:
-    radial-gradient(ellipse 84% 110% at 50% 45%, transparent 56%, rgb(0 0 0 / 0.045) 100%),
-    radial-gradient(ellipse 90% 90% at 50% 0%, rgb(255 255 255 / 0.5) 0%, transparent 60%);
-  box-shadow:
-    inset 0 0 0 1px rgb(0 0 0 / 0.04),
-    inset 0 1px 10px rgb(0 0 0 / 0.04);
-}
-/* Layer 2: crisp selectable neon text */
 html.lamp-grille .code-block pre > code:not(.code-glow) {
   position: relative;
   z-index: 1;
 }
-/* Layer 3: soft phosphor halo around the text (under the pixel grid) */
 html.lamp-grille .code-block pre > code.code-glow {
   position: absolute;
   top: 0;
@@ -343,81 +324,42 @@ html.lamp-grille[data-theme='light'] .code-block pre > code.code-glow {
   opacity: 0.11;
   mix-blend-mode: multiply;
 }
-/* Layer 4: pixel + scanline grid OVER both text and glow, so the glow repeats the pixel texture */
-html.lamp-grille .code-block::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  border-radius: 5px;
-  pointer-events: none;
-  mix-blend-mode: multiply;
-  background-image:
-    repeating-linear-gradient(
-      to bottom,
-      transparent 0 2px,
-      rgb(0 0 0 / 0.12) 2px 3px
-    ),
-    repeating-linear-gradient(
-      to right,
-      rgb(255 232 232) 0 1px,
-      rgb(232 255 232) 1px 2px,
-      rgb(232 232 255) 2px 3px
-    );
-}
-html.lamp-grille[data-theme='light'] .code-block::before {
-  background-image:
-    repeating-linear-gradient(
-      to bottom,
-      transparent 0 2px,
-      rgb(0 0 0 / 0.018) 2px 3px
-    ),
-    repeating-linear-gradient(
-      to right,
-      rgb(255 250 250) 0 1px,
-      rgb(250 255 250) 1px 2px,
-      rgb(250 250 255) 2px 3px
-    );
-}
-/* inline `code` chips get the same recessed glass feel + soft phosphor glow (no grid) */
+/* inline `code` chips: the same recessed glass, scaled down, and the phosphor glow of
+   the text (no grid, no glare: too small for them) */
 html.lamp-grille main :not(pre) > code {
-  background-color: #1b1b1a;
-  background-image:
-    radial-gradient(ellipse 90% 120% at 50% 45%, transparent 45%, rgb(0 0 0 / 0.24) 100%),
-    radial-gradient(ellipse 90% 90% at 50% 0%, rgb(255 255 255 / 0.04) 0%, transparent 65%);
-  box-shadow:
-    inset 0 0 0 1px rgb(0 0 0 / 0.26),
-    inset 0 1px 4px rgb(0 0 0 / 0.26);
+  background-color: var(--surface-screen);
+  background-image: var(--vignette-panel);
+  box-shadow: inset 0 1px 4px rgb(0 0 0 / 0.22);
   text-shadow:
-    0 0 5px color-mix(in srgb, currentColor 55%, transparent),
-    0 0 11px color-mix(in srgb, currentColor 24%, transparent);
+    0 0 5px color-mix(in srgb, currentColor 50%, transparent),
+    0 0 11px color-mix(in srgb, currentColor 22%, transparent);
 }
 html.lamp-grille[data-theme='light'] main :not(pre) > code {
-  background-color: #f3f2ef;
-  background-image:
-    radial-gradient(ellipse 90% 120% at 50% 45%, transparent 50%, rgb(0 0 0 / 0.05) 100%),
-    radial-gradient(ellipse 90% 90% at 50% 0%, rgb(255 255 255 / 0.55) 0%, transparent 65%);
-  box-shadow:
-    inset 0 0 0 1px rgb(0 0 0 / 0.045),
-    inset 0 1px 3px rgb(0 0 0 / 0.05);
+  box-shadow: inset 0 1px 3px rgb(0 0 0 / 0.05);
   text-shadow: 0 0 4px color-mix(in srgb, currentColor 24%, transparent);
 }
-/* keep code inside figure captions plain (no chip, per STYLE.md) */
+/* code inside figure captions stays plain (no chip) */
 html.lamp-grille main figure figcaption code {
   background: none;
   box-shadow: none;
   text-shadow: none;
 }
-/* replace native horizontal scrollbar on code blocks with a cell-tape rail (lamp.ts) */
-html.lamp-grille .code-block pre {
+
+/* thin scroll bars instead of the native ones: a 1px guide and a 1.5px glowing thumb,
+   on the screen under the grid (lamp.ts). Code blocks scroll sideways, the search
+   results up and down. */
+html.lamp-grille :is(.code-block pre, [data-search-results]) {
   scrollbar-width: none;
 }
-html.lamp-grille .code-block pre::-webkit-scrollbar {
+html.lamp-grille :is(.code-block pre, [data-search-results])::-webkit-scrollbar {
   display: none;
 }
-/* extra bottom room only when the horizontal scrollbar is shown */
+/* extra bottom room only when the bar is shown */
 html.lamp-grille .code-block:has(.lamp-code-scroll:not([hidden])) pre {
   padding-bottom: 19px;
+}
+html.lamp-grille [data-search-screen][data-scrolls] [data-search-results] {
+  padding-right: 18px;
 }
 .lamp-code-scroll {
   position: absolute;
@@ -430,51 +372,7 @@ html.lamp-grille .code-block:has(.lamp-code-scroll:not([hidden])) pre {
   align-items: center;
   cursor: pointer;
 }
-.lamp-code-scroll[hidden] {
-  display: none;
-}
-.lamp-code-scroll::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: color-mix(in srgb, var(--border) 75%, transparent);
-}
-.lamp-code-scroll > i {
-  position: relative;
-  display: block;
-  height: 1.5px;
-  border-radius: 1px;
-  background: color-mix(in srgb, var(--foreground) 58%, transparent);
-  box-shadow: 0 0 6px color-mix(in srgb, var(--foreground) 30%, transparent);
-  pointer-events: none;
-  transition: background-color 180ms ease;
-}
-.lamp-code-scroll:hover > i {
-  background: color-mix(in srgb, var(--foreground) 85%, transparent);
-}
-html[data-theme='light'] .lamp-code-scroll > i {
-  background: color-mix(in srgb, var(--foreground) 45%, transparent);
-  box-shadow: 0 0 5px color-mix(in srgb, var(--foreground) 18%, transparent);
-}
-html[data-theme='light'] .lamp-code-scroll:hover > i {
-  background: color-mix(in srgb, var(--foreground) 72%, transparent);
-}
-
-/* the search results scroll with the code-block bar turned upright (lamp.ts
-   setupSearchScroll): a 1px guide and a 1.5px glowing thumb, on the screen under the
-   pixel grid and the glass. */
-html.lamp-grille [data-search-results] {
-  scrollbar-width: none;
-}
-html.lamp-grille [data-search-results]::-webkit-scrollbar {
-  display: none;
-}
-html.lamp-grille [data-search-screen][data-scrolls] [data-search-results] {
-  padding-right: 18px;
-}
-html.lamp-grille .search-screen > .lamp-search-scroll {
+.lamp-search-scroll {
   position: absolute;
   right: 6px;
   z-index: 1;
@@ -483,37 +381,52 @@ html.lamp-grille .search-screen > .lamp-search-scroll {
   justify-content: center;
   cursor: pointer;
 }
-html.lamp-grille .search-screen > .lamp-search-scroll[hidden] {
+:is(.lamp-code-scroll, .lamp-search-scroll)[hidden] {
   display: none;
 }
-.lamp-search-scroll::before {
+:is(.lamp-code-scroll, .lamp-search-scroll)::before {
   content: '';
   position: absolute;
+  background: color-mix(in srgb, var(--border) 75%, transparent);
+}
+.lamp-code-scroll::before {
+  left: 0;
+  right: 0;
+  height: 1px;
+}
+.lamp-search-scroll::before {
   top: 0;
   bottom: 0;
   width: 1px;
-  background: color-mix(in srgb, var(--border) 75%, transparent);
 }
-.lamp-search-scroll > i {
+:is(.lamp-code-scroll, .lamp-search-scroll) > i {
   position: relative;
   display: block;
-  width: 1.5px;
   border-radius: 1px;
   background: color-mix(in srgb, var(--foreground) 58%, transparent);
   box-shadow: 0 0 6px color-mix(in srgb, var(--foreground) 30%, transparent);
   pointer-events: none;
   transition: background-color 180ms ease;
 }
-.lamp-search-scroll:hover > i {
+.lamp-code-scroll > i {
+  height: 1.5px;
+}
+.lamp-search-scroll > i {
+  width: 1.5px;
+}
+:is(.lamp-code-scroll, .lamp-search-scroll):hover > i {
   background: color-mix(in srgb, var(--foreground) 85%, transparent);
+}
+html[data-theme='light'] :is(.lamp-code-scroll, .lamp-search-scroll) > i {
+  background: color-mix(in srgb, var(--foreground) 45%, transparent);
+  box-shadow: 0 0 5px color-mix(in srgb, var(--foreground) 18%, transparent);
+}
+html[data-theme='light'] :is(.lamp-code-scroll, .lamp-search-scroll):hover > i {
+  background: color-mix(in srgb, var(--foreground) 72%, transparent);
 }
 
 /* ---- shadow: a 1-bit dithered drop shadow under the article cards -----------------
-   Added under the cards; nothing that was there is replaced. ------------------------ */
-html.lamp-shadow [data-post-cards] > li {
-  position: relative;
-  isolation: isolate;
-}
+   Switched off (not in Base.astro's list); kept for later. ---------------------------- */
 html.lamp-shadow [data-post-cards] > li::before {
   --dot: color-mix(in srgb, var(--foreground) 20%, transparent);
   content: '';
@@ -526,100 +439,43 @@ html.lamp-shadow [data-post-cards] > li::before {
 }
 
 /* ---- search: the search dialog is built like a code block (rides on `grille`):
-   the query line is the bezel strip on top (.search-bar, like .code-bar: amber
-   indicator pixel, the input, CLOSE [ESC]); below it a CRT screen of the same family
-   as code blocks and the card TOC monitor (.search-screen) holding only the results:
-   1. recessed tube surface with corner vignette (the screen itself)
-   2. content with a soft phosphor glow on the text (z-index: 1)
-   3. quiet pixel + scanline grid over the content (::before, z-index: 2)
-   4. curved glass: diagonal sheen, deeper corners, inner bezel rim (::after, z-index: 3) */
-html.lamp-grille [data-search] {
-  border-color: rgb(0 0 0 / 0.5);
-  background-color: var(--muted);
-  box-shadow:
-    0 0 0 1px var(--border),
-    0 28px 70px rgb(0 0 0 / 0.6);
-}
-/* the screen */
+   the query line is the bezel on top (.search-bar: amber pixel, the input,
+   CLOSE [ESC]); below it a screen (.search-screen, see "screens") holding only
+   the results, the content above the glare (z-index: 1) and under the grid. ---- */
 html.lamp-grille .search-screen {
   position: relative;
   isolation: isolate;
-  border-radius: 0 0 4px 4px;
-  background-color: #1b1b1a;
-  background-image:
-    radial-gradient(ellipse 84% 110% at 50% 45%, transparent 52%, rgb(0 0 0 / 0.24) 100%),
-    radial-gradient(ellipse 90% 90% at 50% 0%, rgb(255 255 255 / 0.03) 0%, transparent 60%);
 }
-html.lamp-grille .search-screen > * {
+html.lamp-grille .search-screen > :is([data-search-results], [data-search-empty]) {
   position: relative;
   z-index: 1;
 }
-html.lamp-grille .search-screen::before,
-html.lamp-grille .search-screen::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-}
-html.lamp-grille .search-screen::before {
-  z-index: 2;
-  mix-blend-mode: multiply;
-  background-image:
-    repeating-linear-gradient(to bottom, transparent 0 2px, rgb(0 0 0 / 0.12) 2px 3px),
-    repeating-linear-gradient(to right, rgb(255 232 232) 0 1px, rgb(232 255 232) 1px 2px, rgb(232 232 255) 2px 3px);
-}
-html.lamp-grille .search-screen::after {
-  z-index: 3;
-  background:
-    linear-gradient(155deg, rgb(255 255 255 / 0.06) 0%, rgb(255 255 255 / 0.015) 26%, transparent 46%),
-    radial-gradient(ellipse 80% 112% at 50% 44%, transparent 55%, rgb(0 0 0 / 0.3) 100%);
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.06),
-    inset 0 0 0 1px rgb(0 0 0 / 0.35),
-    inset 0 2px 18px rgb(0 0 0 / 0.24);
-}
-/* phosphor: everything on the screen glows a little, like the text in code blocks */
-html.lamp-grille .search-screen :is(strong, .search-snip, .search-meta, [data-search-empty]) {
-  text-shadow: 0 0 7px color-mix(in srgb, currentColor 28%, transparent);
-}
 html.lamp-grille .search-screen mark {
-  text-shadow:
-    0 0 6px rgb(var(--lamp-aura, 240 160 75) / 0.55),
-    0 0 14px rgb(var(--lamp-aura, 240 160 75) / 0.22);
+  text-shadow: var(--aura-sm);
 }
 /* results are split by dithered lines, painted by lamp.ts (searchLineSpecs) */
 html.lamp-grille .search-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
   color: var(--primary);
 }
-html.lamp-grille .search-tag::before {
-  content: '';
-  width: 4px;
-  height: 4px;
-  flex: none;
-  background: var(--primary);
-  box-shadow: 0 0 4px rgb(var(--lamp-aura, 240 160 75) / 0.7);
-}
-/* the number dims like a read TOC entry; the highlighted hit's number and title light up */
+/* the number dims like a TOC entry not reached yet; the highlighted hit's number
+   and title light up, as the current TOC entry does */
 html.lamp-grille .search-n {
   color: color-mix(in srgb, var(--primary) 55%, var(--background));
 }
 html.lamp-grille [data-search-results] a :is(strong, .search-n) {
+  text-shadow: var(--aura-off);
   transition:
     color 180ms ease,
-    text-shadow var(--lamp-out, 350ms) var(--lamp-out-ease, ease);
+    text-shadow var(--lamp-out) var(--lamp-out-ease);
 }
 html.lamp-grille [data-search-results] a[aria-selected='true'] :is(strong, .search-n) {
   color: var(--primary);
-  transition:
-    color 120ms ease,
-    text-shadow var(--lamp-in, 120ms) ease-out;
-  text-shadow:
-    0 0 9px rgb(var(--lamp-aura, 240 160 75) / 0.4),
-    0 0 20px rgb(var(--lamp-aura, 240 160 75) / 0.16);
+  text-shadow: var(--aura);
+  transition-duration: var(--lamp-in);
+  transition-timing-function: ease-out;
+}
+html.lamp-grille [data-search-results] a[aria-selected='true'] .search-n {
+  text-shadow: var(--aura-sm);
 }
 
 /* ---- dither: the highlighted search result gets a 2px checkerboard over its fill -- */
@@ -629,7 +485,8 @@ html.lamp-dither [data-search-results] a[aria-selected='true'] {
   background-size: 4px 4px;
 }
 
-/* ---- ants: "marching ants" around a card or search result focused from the keyboard */
+/* ---- ants: "marching ants" around a card or a search result focused from the keyboard.
+   On a card they run around the whole card, over its glass. ------------------------- */
 @keyframes lamp-ants {
   to {
     background-position:
@@ -639,7 +496,19 @@ html.lamp-dither [data-search-results] a[aria-selected='true'] {
       100% 8px;
   }
 }
-html.lamp-ants[data-tabbing] :is([data-post-cards] a.absolute, [data-search-results] a):focus-visible {
+html.lamp-ants[data-tabbing] .card-link:focus-visible {
+  outline: none;
+}
+html.lamp-ants[data-tabbing] .card-item:has(.card-link:focus-visible)::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  border-radius: var(--radius);
+  pointer-events: none;
+}
+html.lamp-ants[data-tabbing] .card-item:has(.card-link:focus-visible)::after,
+html.lamp-ants[data-tabbing] [data-search-results] a:focus-visible {
   outline: none;
   --ant: var(--primary);
   background-image:
@@ -661,73 +530,38 @@ html.lamp-ants[data-tabbing] :is([data-post-cards] a.absolute, [data-search-resu
   animation: lamp-ants 0.7s linear infinite;
 }
 
-/* ---- pixel: a terminal font (VT323) for a few micro labels -------------------------
-   Card TOC numbers and the language label on code blocks. Body text stays as it is. */
-html.lamp-pixel [data-post-cards] nav ol li > span:first-child,
-html.lamp-pixel .code-label,
-html.lamp-pixel .search-n {
+/* ---- pixel: a terminal font (VT323) for small numbers and labels -------------------
+   Section numbers in every TOC, search hit numbers, the language on code blocks
+   (callout titles: see below). Body text stays as it is. */
+html.lamp-pixel :is(.code-label, .search-n),
+html.lamp-pixel :is([data-toc], details[data-toc-fold], [data-post-cards] nav) li[data-depth='2'] > a::before {
   font-family: 'VT323', ui-monospace, monospace;
   font-weight: 400;
   font-size: 15px;
   letter-spacing: 0.02em;
   line-height: 1;
 }
-html.lamp-pixel [data-post-cards] nav ol li > span:first-child {
-  width: 1.25rem;
-}
 
 /* ---- toc: the table of contents as a terminal listing ----------------------------
-   01/02/03 in VT323 for sections, ├─ └─ for sub-sections, sections already read
-   recede, the current one glows. lamp.ts adds a vertical progress rail (side TOC). */
+   01/02/03 for sections, ├─ └─ for sub-sections, sections already read recede, the
+   current one glows. The same listing in the side TOC ([data-toc]), the fold-out
+   one on narrow screens (details) and the contents monitor of the home cards
+   ([data-post-cards] nav). lamp.ts adds a progress rail to the side TOC. */
 html.lamp-toc :is([data-toc], details, [data-post-cards] nav) ol {
   counter-reset: toc;
-}
-/* a long TOC scrolls inside its box without a visible scrollbar; lamp.ts keeps the
-   current section in view instead */
-html.lamp-toc [data-toc],
-html.lamp-toc [data-post-cards] nav ol {
-  scrollbar-width: none;
-}
-html.lamp-toc [data-toc]::-webkit-scrollbar,
-html.lamp-toc [data-post-cards] nav ol::-webkit-scrollbar {
-  display: none;
-}
-/* dark recessed mini-monitor for card TOC (matching code blocks in both themes) */
-html.lamp-toc [data-post-cards] .card-toc-monitor {
-  background-color: #1b1b1a;
-}
-/* quiet pixel + scanline grid over the TOC mini-monitor (matches code blocks) */
-html.lamp-toc [data-post-cards] .card-toc-monitor::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 24;
-  border-radius: inherit;
-  pointer-events: none;
-  mix-blend-mode: multiply;
-  background-image:
-    repeating-linear-gradient(
-      to bottom,
-      transparent 0 2px,
-      rgb(0 0 0 / 0.14) 2px 3px
-    ),
-    repeating-linear-gradient(
-      to right,
-      rgb(255 230 230) 0 1px,
-      rgb(230 255 230) 1px 2px,
-      rgb(230 230 255) 2px 3px
-    );
-}
-/* soft top/bottom fade inside the auto-scrolling TOC mini-monitor */
-html.lamp-toc [data-post-cards] nav ol[data-scrollable] {
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 12px, #000 calc(100% - 14px), transparent 100%);
-  mask-image: linear-gradient(to bottom, transparent 0, #000 12px, #000 calc(100% - 14px), transparent 100%);
 }
 html.lamp-toc :is([data-toc], details, [data-post-cards] nav) li[data-depth='2'] {
   counter-increment: toc;
 }
-/* titles in the code font (IBM Plex Mono, as in code and footnotes): the panel reads
-   like an instrument readout */
+/* a long TOC scrolls inside its box without a visible scrollbar; lamp.ts keeps the
+   current section in view instead */
+html.lamp-toc :is([data-toc], [data-post-cards] nav ol) {
+  scrollbar-width: none;
+}
+html.lamp-toc :is([data-toc], [data-post-cards] nav ol)::-webkit-scrollbar {
+  display: none;
+}
+/* titles in the code font: the panel reads like an instrument readout */
 html.lamp-toc :is([data-toc], details, [data-post-cards] nav) :is(ol, li[data-depth='3']) {
   font-family: var(--font-mono);
   font-size: 12px;
@@ -739,88 +573,36 @@ html.lamp-toc :is([data-toc] > p, details > summary) {
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
+/* one grid for both levels: the tree trunk runs under the centre of the section number,
+   and sub-entry titles start in the same column as section titles */
+html.lamp-toc :is([data-toc], details, [data-post-cards] nav) li[data-depth='3'] {
+  padding-left: 0;
+}
 html.lamp-toc :is([data-toc], details, [data-post-cards] nav) li > a {
+  --tree: color-mix(in srgb, var(--muted-foreground) 45%, var(--background));
+  /* solid 1px strokes */
+  --tree-s: linear-gradient(var(--tree), var(--tree));
   display: flex;
   align-items: baseline;
   gap: 7px;
-  border-left-color: transparent !important;
+  border-left-color: transparent;
+  text-shadow: var(--aura-off);
   transition:
     color 200ms ease,
-    opacity 400ms ease,
-    text-shadow var(--lamp-out, 350ms) var(--lamp-out-ease, ease);
+    text-shadow var(--lamp-out) var(--lamp-out-ease);
 }
 html.lamp-toc :is([data-toc], details, [data-post-cards] nav) li > a::before {
   flex: none;
   width: 18px;
   /* dimmed by colour, not opacity, so the rule under the number keeps the tree's colour */
   color: color-mix(in srgb, var(--primary) 55%, var(--background));
+  text-shadow: var(--aura-off);
   transition:
     color 300ms ease,
-    text-shadow var(--lamp-out, 350ms) var(--lamp-out-ease, ease);
-}
-html.lamp-toc [data-post-cards] .card-toc-monitor li > a::before {
-  color: rgb(240 160 75 / 0.85);
+    text-shadow var(--lamp-out) var(--lamp-out-ease);
 }
 html.lamp-toc :is([data-toc], details, [data-post-cards] nav) li[data-depth='2'] > a::before {
   content: counter(toc, decimal-leading-zero);
-  font-family: 'VT323', ui-monospace, monospace;
-  font-size: 15px;
-  line-height: 1;
-}
-/* sub-sections hang off one continuous tree line (├─ … └─), drawn with gradients so it
-   runs unbroken through the gaps between rows. */
-/* one grid for both levels: the tree trunk runs under the centre of the section
-   number (01/02/03), and sub-entry titles start in the same column as section titles */
-html.lamp-toc :is([data-toc], details, [data-post-cards] nav) li[data-depth='3'] {
-  padding-left: 0;
-  font-size: 12.5px;
-}
-html.lamp-toc :is([data-toc], details, [data-post-cards] nav) li > a {
-  --tree: color-mix(in srgb, var(--muted-foreground) 45%, var(--background));
-  /* solid 1px strokes */
-  --tree-s: linear-gradient(var(--tree), var(--tree));
-}
-/* soft phosphor glow inside the TOC mini-monitor (sits under ::before pixel grid, like code blocks) */
-html.lamp-toc [data-post-cards] .card-toc-monitor :is(ol, li[data-depth='3']) {
-  font-size: 11.5px;
-}
-html.lamp-toc [data-post-cards] .card-toc-monitor li > a {
-  --tree: rgb(255 255 255 / 0.28);
-  text-shadow:
-    0 0 8px rgb(231 229 226 / 0.34),
-    0 0 18px rgb(231 229 226 / 0.14);
-}
-html.lamp-toc [data-post-cards] .card-toc-monitor li[data-depth='2'] > a::before {
-  text-shadow:
-    0 0 8px rgb(240 160 75 / 0.55),
-    0 0 18px rgb(240 160 75 / 0.22);
-}
-/* tighter tree geometry for the compact card mini-monitor (mb-1 = 4px, leading = 17px) */
-html.lamp-toc [data-post-cards] .card-toc-monitor li[data-depth='2'] > a[data-parent] {
-  padding-bottom: 3px;
-  margin-bottom: -3px;
-}
-html.lamp-toc [data-post-cards] .card-toc-monitor li[data-depth='3'] > a::before {
-  margin: -4px 0 0;
-  background:
-    var(--tree-s) 6px 0 / 1px 100% no-repeat,
-    var(--tree-s) 6px 12px / 12px 1px no-repeat;
-}
-html.lamp-toc [data-post-cards] .card-toc-monitor li[data-depth='3'] > a[data-branch='last']::before {
-  background:
-    var(--tree-s) 6px 0 / 1px 13px no-repeat,
-    var(--tree-s) 6px 12px / 12px 1px no-repeat;
-}
-html.lamp-toc [data-post-cards] .card-toc-monitor li[data-depth='3'] > a[data-first]::before {
-  margin-top: -1px;
-  background:
-    var(--tree-s) 6px 0 / 1px 100% no-repeat,
-    var(--tree-s) 6px 9px / 12px 1px no-repeat;
-}
-html.lamp-toc [data-post-cards] .card-toc-monitor li[data-depth='3'] > a[data-first][data-branch='last']::before {
-  background:
-    var(--tree-s) 6px 0 / 1px 10px no-repeat,
-    var(--tree-s) 6px 9px / 12px 1px no-repeat;
 }
 /* a section with sub-sections gets a rule under its number; the tree trunk drops
    from the middle of that rule (┬), and its branches reach right to the titles.
@@ -837,7 +619,6 @@ html.lamp-toc :is([data-toc], details, [data-post-cards] nav) li[data-depth='3']
   content: '';
   align-self: stretch;
   margin: -8px 0 0; /* reach up through the gap above; rows never overlap */
-  opacity: 1;
   background:
     var(--tree-s) 6px 0 / 1px 100% no-repeat,
     var(--tree-s) 6px 17px / 12px 1px no-repeat;
@@ -869,14 +650,15 @@ html.lamp-toc [data-toc] li[data-depth='2'] > a[data-read]:not([data-active])::b
   color: color-mix(in srgb, var(--primary) 30%, var(--background));
 }
 html.lamp-toc [data-toc] a[data-active] {
-  transition-duration: 200ms, 400ms, var(--lamp-in, 350ms);
-  text-shadow:
-    0 0 12px rgb(var(--lamp-aura, 240 160 75) / 0.32),
-    0 0 26px rgb(var(--lamp-aura, 240 160 75) / 0.14);
+  text-shadow: var(--aura);
+  transition-duration: var(--lamp-in);
+  transition-timing-function: ease-out;
 }
 html.lamp-toc [data-toc] a[data-active]::before {
   color: var(--primary);
-  text-shadow: 0 0 8px rgb(var(--lamp-aura, 240 160 75) / 0.6);
+  text-shadow: var(--aura-sm);
+  transition-duration: var(--lamp-in);
+  transition-timing-function: ease-out;
 }
 html.lamp-toc [data-toc] ol {
   position: relative;
@@ -896,7 +678,8 @@ html.lamp-toc [data-toc] ol {
   width: 2px;
   pointer-events: none;
 }
-/* rail cells: lamp.ts places them (see TOC_RAIL there for the two looks) */
+/* rail cells: lamp.ts places them (see TOC_RAIL there for the two looks); the lit
+   ones glow like the cells of the top tape */
 .lamp-toc-rail > i {
   position: absolute;
   left: 0;
@@ -905,86 +688,119 @@ html.lamp-toc [data-toc] ol {
 }
 .lamp-toc-rail > i[data-on] {
   background: var(--primary);
-  /* the lit cells glow like the top tape */
-  filter: drop-shadow(0 0 2px rgb(var(--lamp-aura, 240 160 75) / 0.4)) drop-shadow(0 0 5px rgb(var(--lamp-aura, 240 160 75) / 0.12));
+  filter: var(--cell-glow);
 }
 
-
-
-/* ---- meta: the article header line and site header as an instrument readout ------
-   Date, reading time, tags and site nav in IBM Plex Mono, upper case; active nav
-   item and tags get a glowing amber pixel indicator. */
-html.lamp-meta [data-site-header] :is(a, button) {
-  font-family: var(--font-mono);
+/* the contents monitor of the home cards: smaller type, the tree tightened to its
+   17px rows (mb-1 = 4px), the numbers lit; a long list scrolls by itself (lamp.ts)
+   and fades out at its edges */
+html.lamp-toc [data-post-cards] .card-toc-monitor :is(ol, li[data-depth='3']) {
   font-size: 11.5px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  transition:
-    color 180ms ease,
-    text-shadow var(--lamp-out, 350ms) var(--lamp-out-ease, ease);
 }
-html.lamp-meta [data-site-header] :is(a, button):hover {
-  color: var(--foreground);
-  transition:
-    color 120ms ease,
-    text-shadow var(--lamp-in, 120ms) ease-out;
-  text-shadow:
-    0 0 10px rgb(var(--lamp-aura, 240 160 75) / calc(0.28 * var(--lamp-aura-a, 1))),
-    0 0 22px rgb(var(--lamp-aura, 240 160 75) / calc(0.12 * var(--lamp-aura-a, 1)));
+html.lamp-toc [data-post-cards] .card-toc-monitor li > a::before {
+  color: color-mix(in srgb, var(--primary) 85%, transparent);
 }
-html.lamp-meta [data-site-header] nav a::before {
-  content: '';
-  width: 4px;
-  height: 4px;
-  flex: none;
-  background: color-mix(in srgb, var(--muted-foreground) 32%, transparent);
-  transition:
-    background-color 180ms ease,
-    box-shadow var(--lamp-out, 350ms) var(--lamp-out-ease, ease);
+html.lamp-toc [data-post-cards] .card-toc-monitor li[data-depth='2'] > a::before {
+  text-shadow: var(--aura-sm);
 }
-html.lamp-meta [data-site-header] nav a:hover::before {
-  background: color-mix(in srgb, var(--muted-foreground) 65%, transparent);
+html.lamp-toc [data-post-cards] nav ol[data-scrollable] {
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 12px, #000 calc(100% - 14px), transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 12px, #000 calc(100% - 14px), transparent 100%);
 }
-html.lamp-meta [data-site-header] nav a[aria-current='page']::before {
-  background: var(--primary);
-  box-shadow:
-    0 0 4px rgb(var(--lamp-aura, 240 160 75) / 0.85),
-    0 0 10px rgb(var(--lamp-aura, 240 160 75) / 0.45);
+html.lamp-toc [data-post-cards] .card-toc-monitor li[data-depth='2'] > a[data-parent] {
+  padding-bottom: 3px;
+  margin-bottom: -3px;
 }
-html.lamp-meta [data-site-header] kbd {
-  border: 0;
-  padding: 0;
-  font-family: var(--font-mono);
+html.lamp-toc [data-post-cards] .card-toc-monitor li[data-depth='3'] > a::before {
+  margin: -4px 0 0;
+  background:
+    var(--tree-s) 6px 0 / 1px 100% no-repeat,
+    var(--tree-s) 6px 12px / 12px 1px no-repeat;
+}
+html.lamp-toc [data-post-cards] .card-toc-monitor li[data-depth='3'] > a[data-branch='last']::before {
+  background:
+    var(--tree-s) 6px 0 / 1px 13px no-repeat,
+    var(--tree-s) 6px 12px / 12px 1px no-repeat;
+}
+html.lamp-toc [data-post-cards] .card-toc-monitor li[data-depth='3'] > a[data-first]::before {
+  margin-top: -1px;
+  background:
+    var(--tree-s) 6px 0 / 1px 100% no-repeat,
+    var(--tree-s) 6px 9px / 12px 1px no-repeat;
+}
+html.lamp-toc [data-post-cards] .card-toc-monitor li[data-depth='3'] > a[data-first][data-branch='last']::before {
+  background:
+    var(--tree-s) 6px 0 / 1px 10px no-repeat,
+    var(--tree-s) 6px 9px / 12px 1px no-repeat;
+}
+
+/* ---- toc (narrow screens): the fold-out CONTENTS as a code block ------------------
+   The same 1px frame; the bar is the bezel (amber pixel, label, section count and
+   [+]/[−] in brackets like footnotes); opened, the list sits on a screen (see
+   "screens"). lamp.ts paints the dithered line under the bar. */
+html.lamp-toc details[data-toc-fold] {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+html.lamp-toc details[data-toc-fold] > summary {
+  position: relative;
+  z-index: 4;
+  min-height: 32px;
+  padding: 4px 12px;
+  background-color: var(--muted);
   font-size: 11px;
-  letter-spacing: 0.02em;
-  color: color-mix(in srgb, var(--muted-foreground) 75%, transparent);
+  font-weight: 500;
+  -webkit-tap-highlight-color: transparent;
 }
-html.lamp-meta [data-site-header] kbd::before {
-  content: '[';
-  opacity: 0.55;
+html.lamp-toc details[data-toc-fold] .toc-fold-label {
+  color: var(--foreground);
 }
-html.lamp-meta [data-site-header] kbd::after {
-  content: ']';
-  opacity: 0.55;
+html.lamp-toc details[data-toc-fold] .toc-fold-count {
+  font-size: 10.5px;
+  color: var(--muted-foreground);
 }
-html.lamp-meta main article > header > p {
+html.lamp-toc details[data-toc-fold] .toc-fold-sign {
+  width: 3ch;
+  text-align: center;
+  color: var(--primary);
+  letter-spacing: 0;
+}
+html.lamp-toc details[data-toc-fold] .toc-fold-sign::before {
+  content: '[+]';
+}
+html.lamp-toc details[data-toc-fold][open] .toc-fold-sign::before {
+  content: '[\2212]';
+}
+/* opens like the search dialog: the screen fades in under the bar */
+html.lamp-toc details[data-toc-fold]::details-content {
+  opacity: 0;
+  transition:
+    opacity 220ms ease,
+    content-visibility 220ms allow-discrete;
+}
+html.lamp-toc details[data-toc-fold][open]::details-content {
+  opacity: 1;
+}
+
+/* ---- meta: the article header line as an instrument readout ------------------------
+   Date, reading time and tags in IBM Plex Mono capitals, tags with an amber pixel
+   (see "the indicator pixel"); keys read like footnote numbers: [⌘K], [ESC]. */
+html.lamp-meta main article > header:not([data-project-header]) > p {
   font-family: var(--font-mono);
   font-size: 12px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   column-gap: 18px;
 }
-html.lamp-meta main article > header > p > span:first-child {
+html.lamp-meta main article > header:not([data-project-header]) > p > span:first-child {
   column-gap: 14px;
 }
 /* tags on the left, date and reading time pushed to the right edge */
-html.lamp-meta main article > header > p > time {
+html.lamp-meta main article > header:not([data-project-header]) > p > time {
   margin-left: auto;
 }
 html.lamp-meta main article > header [data-tag] {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
   padding: 0;
   border-radius: 0;
   background: none;
@@ -993,50 +809,21 @@ html.lamp-meta main article > header [data-tag] {
   letter-spacing: 0.06em;
   text-transform: uppercase; /* capitals fill the line, so the indicator sits level with them */
 }
-html.lamp-meta main article > header [data-tag]::before {
-  content: '';
-  width: 5px;
-  height: 5px;
-  background: var(--primary);
-  box-shadow: 0 0 4px rgb(var(--lamp-aura, 240 160 75) / 0.7);
-  transition: box-shadow 300ms ease;
+html.lamp-meta kbd {
+  border: 0;
+  padding: 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: color-mix(in srgb, var(--muted-foreground) 75%, transparent);
 }
-html.lamp-meta main article > header [data-tag]:hover::before {
-  box-shadow:
-    0 0 4px rgb(var(--lamp-aura, 240 160 75) / 0.9),
-    0 0 10px rgb(var(--lamp-aura, 240 160 75) / 0.5);
+html.lamp-meta kbd::before {
+  content: '[';
+  opacity: 0.55;
 }
-/* card tags & home sidebar links share the same glowing 4px amber indicator */
-html.lamp-meta .card-tag::before,
-html.lamp-meta .home-link::before {
-  content: '';
-  width: 4px;
-  height: 4px;
-  flex: none;
-  background: var(--primary);
-  box-shadow: 0 0 4px rgb(var(--lamp-aura, 240 160 75) / 0.7);
-  transition: box-shadow var(--lamp-out, 350ms) var(--lamp-out-ease, ease);
-}
-html.lamp-meta .card-tag:hover::before,
-html.lamp-meta .home-link:hover::before {
-  transition-duration: var(--lamp-in, 120ms);
-  box-shadow:
-    0 0 4px rgb(var(--lamp-aura, 240 160 75) / 0.95),
-    0 0 10px rgb(var(--lamp-aura, 240 160 75) / 0.55);
-}
-html.lamp-meta [data-post-cards] article.has-crt .card-tag::before {
-  background: #f0a04b;
-  box-shadow: 0 0 4px rgb(240 160 75 / 0.75);
-}
-html.lamp-meta [data-post-cards] article.has-crt .card-tag:hover::before {
-  box-shadow:
-    0 0 4px rgb(240 160 75 / 0.95),
-    0 0 10px rgb(240 160 75 / 0.55);
-}
-html.lamp-meta .home-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
+html.lamp-meta kbd::after {
+  content: ']';
+  opacity: 0.55;
 }
 
 /* ---- tables: full-column width, instrument-readout header, dithered row rules -- */
@@ -1072,113 +859,10 @@ html.lamp-meta main tbody tr:last-child td {
 
 @media (prefers-reduced-motion: reduce) {
   .lamp-caret-block,
-  html.lamp-ants :focus-visible {
+  html.lamp-ants :focus-visible,
+  html.lamp-ants .card-item::after {
     animation: none !important;
   }
-}
-
-/* ---- toc (narrow screens): the fold-out CONTENTS as a code block ------------------
-   The bar is the bezel (.code-bar): amber pixel, label, section count and [+]/[−] in
-   brackets like footnotes; opened, the list sits on the same recessed screen with the
-   quiet pixel + scanline grid. lamp.ts paints the dithered line under the bar. */
-html.lamp-toc details[data-toc-fold] {
-  position: relative;
-  isolation: isolate;
-  border: 0;
-  border-radius: 5px;
-}
-html.lamp-toc details[data-toc-fold] > summary {
-  position: relative;
-  z-index: 4;
-  min-height: 32px;
-  padding: 4px 12px;
-  background-color: var(--muted);
-  border-radius: 5px;
-  font-size: 11px;
-  font-weight: 500;
-  -webkit-tap-highlight-color: transparent;
-  transition: border-radius 0ms 220ms;
-}
-html.lamp-toc details[data-toc-fold][open] > summary {
-  border-radius: 5px 5px 0 0;
-  transition-delay: 0ms;
-}
-html.lamp-toc details[data-toc-fold] .toc-fold-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--foreground);
-}
-html.lamp-toc details[data-toc-fold] .toc-fold-label::before {
-  content: '';
-  width: 4px;
-  height: 4px;
-  flex: none;
-  background: var(--primary);
-  box-shadow: 0 0 4px rgb(var(--lamp-aura, 240 160 75) / 0.65);
-  transition: box-shadow var(--lamp-out, 350ms) var(--lamp-out-ease, ease);
-}
-html.lamp-toc details[data-toc-fold][open] .toc-fold-label::before {
-  transition-duration: var(--lamp-in, 120ms);
-  box-shadow:
-    0 0 5px rgb(var(--lamp-aura, 240 160 75) / 0.9),
-    0 0 12px rgb(var(--lamp-aura, 240 160 75) / 0.5);
-}
-html.lamp-toc details[data-toc-fold] .toc-fold-count {
-  font-size: 10.5px;
-  color: var(--muted-foreground);
-}
-html.lamp-toc details[data-toc-fold] .toc-fold-sign {
-  width: 3ch;
-  text-align: center;
-  color: var(--primary);
-  letter-spacing: 0;
-}
-html.lamp-toc details[data-toc-fold] .toc-fold-sign::before {
-  content: '[+]';
-}
-html.lamp-toc details[data-toc-fold][open] .toc-fold-sign::before {
-  content: '[\2212]';
-}
-/* the screen: recessed glass, vignette and inner rim, as under a code block */
-html.lamp-toc details[data-toc-fold] .toc-fold-screen {
-  margin: 0;
-  border-radius: 0 0 5px 5px;
-  background-color: #1b1b1a;
-  background-image:
-    radial-gradient(ellipse 84% 110% at 50% 45%, transparent 52%, rgb(0 0 0 / 0.24) 100%),
-    radial-gradient(ellipse 90% 90% at 50% 0%, rgb(255 255 255 / 0.03) 0%, transparent 60%);
-  box-shadow:
-    inset 0 0 0 1px rgb(0 0 0 / 0.24),
-    inset 0 2px 14px rgb(0 0 0 / 0.22);
-}
-html.lamp-toc details[data-toc-fold] .toc-fold-screen::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  border-radius: inherit;
-  pointer-events: none;
-  mix-blend-mode: multiply;
-  background-image:
-    repeating-linear-gradient(to bottom, transparent 0 2px, rgb(0 0 0 / 0.14) 2px 3px),
-    repeating-linear-gradient(to right, rgb(255 230 230) 0 1px, rgb(230 255 230) 1px 2px, rgb(230 230 255) 2px 3px);
-}
-html.lamp-toc[data-theme='light'] details[data-toc-fold] .toc-fold-screen {
-  background-color: #f3f2ef;
-  box-shadow:
-    inset 0 0 0 1px rgb(0 0 0 / 0.04),
-    inset 0 1px 10px rgb(0 0 0 / 0.04);
-}
-/* opens like the search dialog: the screen fades in under the bar */
-html.lamp-toc details[data-toc-fold]::details-content {
-  opacity: 0;
-  transition:
-    opacity 220ms ease,
-    content-visibility 220ms allow-discrete;
-}
-html.lamp-toc details[data-toc-fold][open]::details-content {
-  opacity: 1;
 }
 
 /* ---- sidenotes (narrow screens): the amber rule glows ------------------------------
@@ -1203,13 +887,111 @@ html.lamp-toc details[data-toc-fold][open]::details-content {
     background: linear-gradient(
       to right,
       transparent,
-      rgb(var(--lamp-aura, 240 160 75) / 0.045) 35%,
-      rgb(var(--lamp-aura, 240 160 75) / 0.09) 50%,
-      rgb(var(--lamp-aura, 240 160 75) / 0.045) 65%,
+      color-mix(in srgb, var(--primary) 4.5%, transparent) 35%,
+      color-mix(in srgb, var(--primary) 9%, transparent) 50%,
+      color-mix(in srgb, var(--primary) 4.5%, transparent) 65%,
       transparent
     );
     filter: blur(4px);
     -webkit-mask-image: linear-gradient(to bottom, transparent, #000 28%, #000 72%, transparent);
     mask-image: linear-gradient(to bottom, transparent, #000 28%, #000 72%, transparent);
   }
+}
+
+/* ---- quotes & callouts: a dark matte inkjet printout ------------------------------
+   Graphite paper (--surface-print), faint carriage-pass banding on the 24px lines,
+   1px perforated tear rules top and bottom, a 2px ink stripe on the left in the
+   callout's ink (--c, set per kind in markdown-classes.mjs; amber for a plain quote
+   and for warnings), IBM Plex Mono with a little ink spread, a VT323 stamp title. */
+html.lamp-ui main :is(blockquote, .callout) {
+  position: relative;
+  border-left: 2px solid var(--c, var(--primary));
+  border-right: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+  border-radius: 0;
+  background-color: var(--surface-print);
+  background-image:
+    repeating-linear-gradient(to bottom, transparent 0 24px, rgb(255 255 255 / 0.018) 24px 48px),
+    repeating-linear-gradient(to bottom, transparent 0 5px, rgb(0 0 0 / 0.07) 5px 6px);
+  margin-block: 1.75rem;
+  padding: 12px 18px 12px 15px;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 24px;
+  font-variant-numeric: lining-nums tabular-nums;
+  text-shadow: 0 0 0.7px color-mix(in srgb, currentColor 32%, transparent);
+}
+html.lamp-ui[data-theme='light'] main :is(blockquote, .callout) {
+  background-image:
+    repeating-linear-gradient(to bottom, transparent 0 24px, rgb(0 0 0 / 0.022) 24px 48px),
+    repeating-linear-gradient(to bottom, transparent 0 5px, rgb(0 0 0 / 0.018) 5px 6px);
+}
+/* 1px perforated tear-off edges top & bottom */
+html.lamp-ui main :is(blockquote, .callout)::before,
+html.lamp-ui main :is(blockquote, .callout)::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to right,
+    color-mix(in srgb, var(--muted-foreground) 34%, transparent) 0 4px,
+    transparent 4px 8px
+  );
+}
+html.lamp-ui main :is(blockquote, .callout)::before {
+  top: 0;
+}
+html.lamp-ui main :is(blockquote, .callout)::after {
+  bottom: 0;
+}
+html.lamp-ui main :is(blockquote, .callout) :not(pre) > code {
+  font-size: 0.94em;
+}
+html.lamp-ui main :is(blockquote, .callout) :is(blockquote, .callout) {
+  margin-block: 1rem;
+  background-color: color-mix(in srgb, var(--surface-print) 65%, var(--background));
+}
+html.lamp-ui main :is(blockquote, .callout-quote) {
+  font-style: italic;
+  color: var(--muted-foreground);
+}
+html.lamp-ui main :is(blockquote, .callout-quote) strong {
+  color: var(--foreground);
+}
+html.lamp-ui main :is(blockquote, .callout-quote) :is(em, code) {
+  font-style: normal;
+}
+html.lamp-ui main .callout:not(.callout-quote) {
+  color: color-mix(in srgb, var(--foreground) 90%, var(--muted-foreground));
+}
+html.lamp-ui main :is(blockquote, .callout) > p:not(.callout-title) {
+  margin-bottom: 0.75rem;
+}
+html.lamp-ui main :is(blockquote, .callout) > :last-child {
+  margin-bottom: 0;
+}
+
+/* callout title: a stamp in the callout's ink with its pixel (see "the indicator pixel") */
+html.lamp-meta main .callout-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 0 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-style: normal;
+  color: var(--c, var(--primary));
+}
+html.lamp-pixel main .callout-title {
+  font-family: 'VT323', var(--font-mono), monospace;
+  font-weight: 400;
+  font-size: 16px;
+  letter-spacing: 0.04em;
+  line-height: 1;
 }

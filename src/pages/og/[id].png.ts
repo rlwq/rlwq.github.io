@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import { render } from 'astro:content';
-import { formatDate, getPosts, readingMinutes, type Post } from '../../lib/posts';
+import { formatDate, getPosts, isoDay, readingMinutes, type Post } from '../../lib/posts';
 import { renderOgImage } from '../../lib/og';
 
 export async function getStaticPaths() {
@@ -19,7 +19,7 @@ export const GET: APIRoute = async ({ props }) => {
     title: post.data.title,
     subtitle: formatDate(post.data.date),
     readTime: `${minutes} min read`,
-    date: post.data.date.toISOString().slice(0, 10),
+    date: isoDay(post.data.date),
     minutes,
     tags: post.data.tags,
     sections,

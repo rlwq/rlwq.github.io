@@ -1,0 +1,58 @@
+---
+import { Image } from 'astro:assets';
+import { coverPosClass } from '../lib/cover';
+import { projectUrl, type Project } from '../lib/projects';
+
+interface Props {
+  projects: Project[];
+}
+
+const { projects } = Astro.props;
+---
+
+<!-- The same two tubes in one frame as the article cards (.tube, lamp.css "vignette"):
+     the cover, clean (no CRT), and a panel with the title, the line and the tags. -->
+<ul class="grid gap-5" data-project-cards>
+  {
+    projects.map((project) => {
+      const { title, description, tags, cover, coverPosition } = project.data;
+
+      return (
+        <li class="card-item relative isolate">
+          <article class="card-shell relative flex flex-col overflow-hidden rounded-md border md:h-[164px] md:flex-row">
+            <a href={projectUrl(project.id)} class="card-link absolute inset-0 z-30" aria-label={title} />
+
+            {cover && (
+              <div class="tube relative isolate aspect-[3/2] w-full shrink-0 overflow-hidden bg-tube md:aspect-auto md:h-full md:w-[246px]">
+                <Image
+                  src={cover}
+                  alt=""
+                  widths={[480, 720]}
+                  sizes="(max-width: 767px) 100vw, 246px"
+                  class:list={['pointer-events-none h-full w-full object-cover', coverPosClass[coverPosition]]}
+                />
+              </div>
+            )}
+
+            <div class="tube pointer-events-none relative isolate flex min-w-0 flex-1 flex-col justify-between gap-2 bg-tube px-5 py-4" data-glare>
+              <div class="relative z-10">
+                <h3 class="text-[21px] leading-[1.2] font-medium tracking-[-0.015em] text-balance text-foreground sm:text-[23px]">
+                  {title}
+                </h3>
+                <p class="mt-1.5 line-clamp-2 text-[14.5px] leading-[21px] text-muted-foreground">{description}</p>
+              </div>
+
+              {tags.length > 0 && (
+                <div class="relative z-10 flex flex-wrap gap-x-3.5 gap-y-1">
+                  {tags.map((t) => (
+                    <span class="project-tag font-mono text-[11px] leading-4 tracking-[0.06em] text-primary uppercase">{t}</span>
+                  ))}
+                </div>
+              )}
+            </div>
+          </article>
+        </li>
+      );
+    })
+  }
+</ul>

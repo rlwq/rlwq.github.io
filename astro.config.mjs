@@ -20,10 +20,27 @@ function dropLightTheme() {
   const light = /\[data-theme=(['"]?)light\1\]/;
   // the lookbehind leaves the previous rule's } in place, so back-to-back rules all match
   const rule = /(?<=^|[{};])([^{};@]+)\{[^{}]*\}/g;
+  /** A selector list split on its own commas, not those inside :is(), :not(), ...
+   *  @param {string} list */
+  const split = (list) => {
+    /** @type {string[]} */
+    const parts = [];
+    let depth = 0;
+    let from = 0;
+    for (let i = 0; i < list.length; i++) {
+      if (list[i] === '(') depth++;
+      else if (list[i] === ')') depth--;
+      else if (list[i] === ',' && depth === 0) {
+        parts.push(list.slice(from, i));
+        from = i + 1;
+      }
+    }
+    return [...parts, list.slice(from)];
+  };
   /** @param {string} css */
   const strip = (css) =>
     css.replace(rule, (/** @type {string} */ all, /** @type {string} */ selectors) =>
-      selectors.split(',').every((s) => light.test(s)) ? '' : all,
+      split(selectors).every((s) => light.test(s)) ? '' : all,
     );
   return {
     name: 'drop-light-theme',

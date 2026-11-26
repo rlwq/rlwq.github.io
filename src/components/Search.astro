@@ -1,11 +1,11 @@
 <dialog
-  class="mx-auto mt-[12vh] max-h-[min(560px,76vh)] w-[min(620px,calc(100vw-32px))] overflow-hidden rounded-[5px] border bg-muted p-0 text-foreground shadow-2xl backdrop:bg-black/60 open:flex open:flex-col"
+  class="mx-auto mt-[12vh] max-h-[min(560px,76vh)] w-[min(620px,calc(100vw-32px))] overflow-hidden rounded-md border bg-muted p-0 text-foreground open:flex open:flex-col"
   data-search
   aria-label="Search articles"
 >
   <!-- bezel: the instrument strip above the screen, like .code-bar on code blocks -->
   <div class="search-bar flex items-center gap-3 pr-2 pl-[18px]" data-search-bar>
-    <span class="search-dot size-1 shrink-0 bg-primary shadow-[0_0_4px_rgb(240_160_75/0.65)]" aria-hidden="true"></span>
+    <span class="search-dot size-1 shrink-0 bg-primary" aria-hidden="true"></span>
     <input
       class="h-12 min-w-0 flex-1 bg-transparent font-mono text-[15px] outline-none placeholder:text-muted-foreground/70 [&::-webkit-search-cancel-button]:hidden"
       type="search"
@@ -16,10 +16,10 @@
       aria-controls="search-results"
       data-search-input
     />
-    <button type="button" class="lightbox-btn lightbox-close" data-search-close>Close <kbd>Esc</kbd></button>
+    <button type="button" class="mono-btn" data-search-close>Close <kbd>Esc</kbd></button>
   </div>
-  <!-- screen: the results -->
-  <div class="search-screen flex min-h-0 flex-1 flex-col" data-search-screen>
+  <!-- screen: the results, on the same glass as code blocks -->
+  <div class="search-screen flex min-h-0 flex-1 flex-col" data-search-screen data-glare>
     <ul class="overflow-y-auto p-1.5" id="search-results" role="listbox" data-search-results></ul>
     <p class="p-[18px] font-mono text-[12px] tracking-[0.02em] text-muted-foreground" data-search-empty>
       Type to search titles, tags and article text.

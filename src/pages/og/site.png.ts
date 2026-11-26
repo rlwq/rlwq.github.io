@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import { renderOgImage } from '../../lib/og';
-import { getPosts } from '../../lib/posts';
+import { getPosts, isoDay } from '../../lib/posts';
 import { site } from '../../site.config';
 
 export const GET: APIRoute = async () => {
@@ -11,7 +11,7 @@ export const GET: APIRoute = async () => {
     subtitle: site.tagline,
     tagline: site.tagline,
     links: ['github.com/rlwq'],
-    articles: posts.map((p) => ({ title: p.data.title, date: p.data.date.toISOString().slice(0, 10) })),
+    articles: posts.map((p) => ({ title: p.data.title, date: isoDay(p.data.date) })),
   });
 
   return new Response(new Uint8Array(png), {

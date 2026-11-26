@@ -1,0 +1,16 @@
+---
+import Base from '../../layouts/Base.astro';
+import ProjectView from '../../components/Project.astro';
+import { getProjects, type Project } from '../../lib/projects';
+
+export async function getStaticPaths() {
+  const projects = await getProjects();
+  return projects.map((project) => ({ params: { id: project.id }, props: { project } }));
+}
+
+const { project } = Astro.props as { project: Project };
+---
+
+<Base title={project.data.title} description={project.data.description}>
+  <ProjectView project={project} />
+</Base>

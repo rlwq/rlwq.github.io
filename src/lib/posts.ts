@@ -12,12 +12,24 @@ export async function getPosts() {
 }
 
 const longDate = new Intl.DateTimeFormat('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
-const shortDate = new Intl.DateTimeFormat('en-US', { day: 'numeric', month: 'short' });
 export const formatDate = (d: Date) => longDate.format(d);
-export const formatShort = (d: Date) => shortDate.format(d);
+/** Dates read like an instrument log: 2026-11-19 */
+export const isoDay = (d: Date) => d.toISOString().slice(0, 10);
 
 /** plural(5, 'article') -> '5 articles' */
 export const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
+
+/** The attributes a table of contents hangs its tree on (lamp.css "toc"): data-parent on a
+ *  section followed by sub-sections, data-first on the first of them, data-branch (mid or
+ *  last, for ├─ or └─) on every sub-section. Spread onto entry i's link. */
+export function tocAttrs(list: { depth: number }[], i: number) {
+  const [prev, cur, next] = [list[i - 1], list[i], list[i + 1]];
+  return {
+    'data-parent': cur.depth === 2 && next?.depth === 3 ? '' : undefined,
+    'data-first': cur.depth === 3 && prev?.depth === 2 ? '' : undefined,
+    'data-branch': cur.depth === 3 ? (next?.depth === 3 ? 'mid' : 'last') : undefined,
+  };
+}
 
 // ---- Text helpers --------------------------------------------------------
 
