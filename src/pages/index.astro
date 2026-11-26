@@ -2,7 +2,7 @@
 import Base from '../layouts/Base.astro';
 import ArticleCards from '../components/ArticleCards.astro';
 import ProjectCards from '../components/ProjectCards.astro';
-import { getPosts, plural } from '../lib/posts';
+import { getPosts } from '../lib/posts';
 import { getProjects } from '../lib/projects';
 import { site } from '../site.config';
 
@@ -42,26 +42,20 @@ const projects = await getProjects();
 
         <div class="min-w-0 flex-1 space-y-12 lg:pl-10">
           <section data-home-projects aria-labelledby="home-projects-label">
-            <div class="mb-5 flex items-baseline justify-between gap-4">
+            <div class="mb-5">
               <h2 id="home-projects-label" class="font-mono text-[11.5px] tracking-[0.06em] text-muted-foreground uppercase">
                 Projects
               </h2>
-              <span class="font-mono text-[11.5px] tracking-[0.06em] text-muted-foreground uppercase">
-                {plural(projects.length, 'project')}
-              </span>
             </div>
 
             <ProjectCards projects={projects} />
           </section>
 
           <section data-home-articles aria-labelledby="home-articles-label">
-            <div class="mb-5 flex items-baseline justify-between gap-4">
+            <div class="mb-5">
               <h2 id="home-articles-label" class="font-mono text-[11.5px] tracking-[0.06em] text-muted-foreground uppercase">
                 Articles
               </h2>
-              <span class="font-mono text-[11.5px] tracking-[0.06em] text-muted-foreground uppercase">
-                {plural(posts.length, 'article')}
-              </span>
             </div>
 
             <ArticleCards posts={posts} />
