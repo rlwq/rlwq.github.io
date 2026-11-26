@@ -1,8 +1,9 @@
 // Search dialog: ⌘K / Ctrl+K or "/" opens it. The index is a small JSON file
 // built with the site (/search.json), loaded the first time search opens.
 
-// t title, u url, g tags (space-separated), d date (YYYY-MM-DD), m minutes to read, x text
-type Doc = { t: string; u: string; g: string; d: string; m: number; x: string };
+// t title, u url, g tags (comma-separated: a tag may hold spaces), d date (YYYY-MM-DD; a project: its year),
+// m minutes to read, x text, p 1 for a project
+type Doc = { t: string; u: string; g: string; d: string; m: number; x: string; p?: 1 };
 
 const loadDocs = () => fetch('/search.json').then((r) => r.json() as Promise<Doc[]>);
 
@@ -44,7 +45,7 @@ function initSearch(dialog: HTMLDialogElement) {
   function idle() {
     results.innerHTML = '';
     empty.hidden = false;
-    empty.textContent = 'Type to search titles, tags and article text.';
+    empty.textContent = 'Type to search articles and projects: titles, tags and text.';
   }
 
   let runs = 0;
@@ -61,7 +62,7 @@ function initSearch(dialog: HTMLDialogElement) {
       .map((d) => {
         const title = norm(d.t);
         const tags = norm(d.g);
-        const tagList = tags.split(/\s+/).filter(Boolean);
+        const tagList = tags.split(',').filter(Boolean);
         const body = norm(d.x);
         let score = 0;
         for (const w of words) {
@@ -92,12 +93,12 @@ function initSearch(dialog: HTMLDialogElement) {
     results.innerHTML = scored
       .map(({ d }, i) => {
         const text = snipWord ? snippet(d.x, snipWord) : d.x.slice(0, 140) + (d.x.length > 140 ? '…' : '');
-        const tags = d.g.split(/\s+/).filter(Boolean).map((t) => `<span class="search-tag">${escape(t)}</span>`).join('');
+        const tags = d.g.split(',').filter(Boolean).map((t) => `<span class="search-tag">${escape(t)}</span>`).join('');
         return `<li><a class="grid grid-cols-[24px_1fr] gap-x-2 rounded-[3px] px-3 py-3" href="${d.u}" role="option" aria-selected="${i === 0}">
           <span class="search-n pt-px font-mono text-[12px] leading-5" aria-hidden="true">${String(i + 1).padStart(2, '0')}</span>
           <span class="min-w-0">
             <strong class="block font-mono text-[13.5px] leading-5 font-medium">${highlight(d.t, hl)}</strong>
-            <span class="search-meta mt-1 flex flex-wrap items-center gap-x-3.5 gap-y-1 font-mono text-[10.5px] leading-4 tracking-[0.06em] text-muted-foreground uppercase"><span>${escape(d.d)}<span class="mx-2 opacity-50">·</span>${d.m} min read</span>${tags}</span>
+            <span class="search-meta mt-1 flex flex-wrap items-center gap-x-3.5 gap-y-1 font-mono text-[10.5px] leading-4 tracking-[0.06em] text-muted-foreground uppercase"><span>${d.p ? 'project' : escape(d.d)}<span class="mx-2 opacity-50">·</span>${d.p ? escape(d.d) : `${d.m} min read`}</span>${tags}</span>
             <span class="search-snip mt-1.5 line-clamp-2 font-mono text-[12px] leading-[19px] text-muted-foreground">${highlight(text, hl)}</span>
           </span>
         </a></li>`;
