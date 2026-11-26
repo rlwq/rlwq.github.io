@@ -208,7 +208,7 @@ html.lamp-toc details[data-toc-fold] .toc-fold-label::before {
     color 180ms ease,
     box-shadow var(--lamp-out) var(--lamp-out-ease);
 }
-html.lamp-meta :is(main article > header [data-tag], .card-tag, .home-link):hover::before,
+html.lamp-meta :is(main article > header [data-tag], .home-link):hover::before,
 html.lamp-meta [data-site-header] nav a[aria-current='page']::before,
 html.lamp-grille .code-block[data-copied] .code-bar > :is(.code-label, .code-title):not(:empty)::before,
 html.lamp-toc details[data-toc-fold][open] .toc-fold-label::before {

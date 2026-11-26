@@ -81,13 +81,7 @@ const items = await Promise.all(
                   {tags.length > 0 && (
                     <div class="mt-2.5 flex flex-wrap gap-x-3.5 gap-y-1">
                       {tags.map((t) => (
-                        <button
-                          type="button"
-                          data-tag={t}
-                          class="card-tag pointer-events-auto cursor-pointer font-mono text-[11px] leading-4 tracking-[0.06em] text-primary uppercase"
-                        >
-                          {t}
-                        </button>
+                        <span class="card-tag font-mono text-[11px] leading-4 tracking-[0.06em] text-primary uppercase">{t}</span>
                       ))}
                     </div>
                   )}
